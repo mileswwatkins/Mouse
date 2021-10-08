@@ -1,0 +1,23 @@
+{
+  "name": "GarminBot",
+  "version": "0.0.0",
+  "private": true,
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "twilio-run",
+    "deploy": "twilio-run deploy"
+  },
+  "dependencies": {
+    "@twilio/runtime-handler": "1.1.3",
+    "axios": "^0.22.0",
+    "cheerio": "^1.0.0-rc.10",
+    "date-fns": "^2.25.0",
+    "twilio": "^3.56"
+  },
+  "devDependencies": {
+    "twilio-run": "^3.2.2"
+  },
+  "engines": {
+    "node": "12"
+  }
+}
