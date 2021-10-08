@@ -76,7 +76,7 @@ const shortenWeather = (weather) => {
 
   // Double spaces after a period appear in some of NWS's
   // weather descriptions
-  shortenedWeather = shortenedWeather.replace(/\s+/, " ");
+  shortenedWeather = shortenedWeather.replace(/\s+/g, " ");
 
   // Make various shortenings without losing information or
   // readability
