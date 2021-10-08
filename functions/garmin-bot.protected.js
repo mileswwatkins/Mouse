@@ -1,7 +1,9 @@
-const handleWeatherInvocation = require('./garmin-bot/weather.private.js')
-const handleClosuresInvocation = require('./garmin-bot/closures.private.js')
-
 exports.handler = async function (context, event, callback) {
+  // Need to use this syntax to `require` these `private`
+  // handler/helper functions
+  const handleWeatherInvocation = require(Runtime.getFunctions()['weather'].path)
+  const handleClosuresInvocation = require(Runtime.getFunctions()['closures'].path)
+
   // TO DO: Add a whitelist of phone numbers, and block all others,
   // to avoid Twilio expenses. Numbers cannot actually be blocked
   // in Twilio itself, unfortunately, but at least we can prevent
