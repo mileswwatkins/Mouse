@@ -1,12 +1,19 @@
 const axios = require("axios").default;
 
 const inReachSlugToWeatherUrl = async (inReachSlug) => {
-  const inReachData = await (
-    await axios.get(`http://inreachlink.com/${inReachSlug}`)
-  ).data;
+  const url = `http://inreachlink.com/${inReachSlug}`;
+  const inReachData = await (await axios.get(url)).data;
 
-  const latitude = inReachData.match(/\s+lat : (-?\d+\.\d+),/)[1];
-  const longitude = inReachData.match(/\s+lon : (-?\d+\.\d+),/)[1];
+  let latitude;
+  let longitude;
+  try {
+    latitude = inReachData.match(/\s+lat : (-?\d+\.\d+),/)[1];
+    longitude = inReachData.match(/\s+lon : (-?\d+\.\d+),/)[1];
+  } catch {
+    console.error(`Failed to find latitude and longitude from ${url}`);
+    return null;
+  }
+
   console.debug(
     `Determined InReach location to be: lat ${latitude}, lon ${longitude}`
   );
@@ -23,6 +30,9 @@ const buildIntroMessage = (weatherData, days) => {
   if (hazards.length) {
     message += `; current warnings: ${hazards.join(", ")}`;
   }
+  // Keep consistency with the weather summaries, which all end
+  // in a period
+  message = message + '.'
 
   return message;
 };
@@ -125,6 +135,12 @@ const handleWeatherInvocation = async (inReachSlug, days, callback) => {
   const twiml = new Twilio.twiml.MessagingResponse();
 
   const weatherUrl = await inReachSlugToWeatherUrl(inReachSlug);
+  if (weatherUrl === null) {
+    twiml.message(
+      "Failed to load InReach location, please try again in a few minutes"
+    );
+    return callback(null, twiml);
+  }
   const weatherData = await (await axios.get(weatherUrl)).data;
 
   twiml.message(buildIntroMessage(weatherData, days));

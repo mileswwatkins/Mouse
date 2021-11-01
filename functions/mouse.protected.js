@@ -4,16 +4,26 @@ exports.handler = async function (context, event, callback) {
   const handleWeatherInvocation = require(Runtime.getFunctions()['weather'].path)
   const handleClosuresInvocation = require(Runtime.getFunctions()['closures'].path)
 
+  // Create an empty TwiML response, in case an error response
+  // needs to be sent
+  const twiml = new Twilio.twiml.MessagingResponse();
+
   // TO DO: Add a whitelist of phone numbers, and block all others,
   // to avoid Twilio expenses. Numbers cannot actually be blocked
   // in Twilio itself, unfortunately, but at least we can prevent
   // sending unauthorized outbound messages.
 
   const incomingMessage = event.Body;
+  if (typeof incomingMessage === 'undefined') {
+    twiml.message(
+      "Error: No message found, make sure one is sent in the HTTP request"
+    );
+    return callback(null, twiml)
+  }
 
-  // All InReach messages include `  - ${user's name}` at the end,
+  // All InReach messages include ` - ${user's name}` at the end,
   // so strip that off
-  let invocation = incomingMessage.split("  - ")[0].trim();
+  let invocation = incomingMessage.split(/ {1,3}- /)[0].trim();
   let inReachSlug = null;
 
   // The user may have location sharing turned on, in which case
@@ -21,14 +31,13 @@ exports.handler = async function (context, event, callback) {
   // `  - ${user's name}`
   if (incomingMessage.includes("inreachlink.com")) {
     inReachSlug = incomingMessage.match(/inreachlink\.com\/([A-Z|\d]{7})/)[1];
-    invocation = invocation.split(" inreachlink.com")[0].trim();
+    invocation = invocation.replace(inReachSlug, '').trim()
   }
   invocation = invocation.toLowerCase();
 
   // TO DO: Add invocations for air quality, sports scores, Wikipedia
   if (invocation.includes("weather")) {
     if (inReachSlug === null) {
-      const twiml = new Twilio.twiml.MessagingResponse();
       twiml.message(
         "Error: You must include your InReach location link in your text message"
       );
@@ -41,7 +50,6 @@ exports.handler = async function (context, event, callback) {
   } else if (invocation.includes("closures")) {
     return await handleClosuresInvocation(invocation, callback);
   } else {
-    const twiml = new Twilio.twiml.MessagingResponse();
     twiml.message(
       "Error: Your text must include which information you want; available options: `weather`, `closures`"
     );
