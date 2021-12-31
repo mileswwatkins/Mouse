@@ -1,8 +1,12 @@
+const { Twilio } = require("twilio");
+
 exports.handler = async function (context, event, callback) {
   // Need to use this syntax to `require` these `private`
   // handler/helper functions
-  const handleWeatherInvocation = require(Runtime.getFunctions()['weather'].path)
-  const handleClosuresInvocation = require(Runtime.getFunctions()['closures'].path)
+  const handleWeatherInvocation = require(Runtime.getFunctions()["weather"]
+    .path);
+  const handleClosuresInvocation = require(Runtime.getFunctions()["closures"]
+    .path);
 
   // Create an empty TwiML response, in case an error response
   // needs to be sent
@@ -14,11 +18,11 @@ exports.handler = async function (context, event, callback) {
   // sending unauthorized outbound messages.
 
   const incomingMessage = event.Body;
-  if (typeof incomingMessage === 'undefined') {
+  if (typeof incomingMessage === "undefined") {
     twiml.message(
       "Error: No message found, make sure one is sent in the HTTP request"
     );
-    return callback(null, twiml)
+    return callback(null, twiml);
   }
 
   // All InReach messages include ` - ${user's name}` at the end,
@@ -31,7 +35,7 @@ exports.handler = async function (context, event, callback) {
   // `  - ${user's name}`
   if (incomingMessage.includes("inreachlink.com")) {
     inReachSlug = incomingMessage.match(/inreachlink\.com\/([A-Z|\d]{7})/)[1];
-    invocation = invocation.replace(inReachSlug, '').trim()
+    invocation = invocation.replace(inReachSlug, "").trim();
   }
   invocation = invocation.toLowerCase();
 
