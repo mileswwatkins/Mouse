@@ -1,12 +1,14 @@
 # Mouse 🐭
 
-A Twilio Serverless chatbot to provide information to backcountry hikers via satellite SMS, such as Garmin InReach.
+A Twilio Serverless chatbot to provide information to backcountry hikers via SMS, such as on Garmin InReach satellite communication devices.
 
-![screenshot demonstrating a user receiving a weather forecast](README-weather-screenshot.png)
+<p align="center">
+    <img src="https://github.com/mileswwatkins/Mouse/blob/main/README-weather-screenshot.png?raw=true" style="height: 400px;" />
+</p>
 
 ## How do I get access to Mouse?
 
-Mouse is currently in beta, so you'll need to ask the developer (Miles Watkins) for access to Mouse's phone number. Once you have that phone number, you can text it from your Garmin InReach or other SMS-capable device.
+Mouse is currently in beta, so you'll need to ask the developer (Miles Watkins) for Mouse's phone number. Once you have that phone number, you can text it from your Garmin InReach or other SMS-capable device.
 
 ## What can I ask Mouse?
 
@@ -14,11 +16,11 @@ Mouse is currently in beta, so you'll need to ask the developer (Miles Watkins) 
 
 _The user must have be using a Garmin InReach with location sharing turned on, in which case there will be an `inreachlink.com/#######` automatically appended to the message. This link can be used to determine your GPS location and thus fetch your weather forecast._
 
-Your message:
+##### Your message:
 
 ```weather```
 
-Mouse's response:
+##### Mouse's response:
 
 ```text
 2-day forecast for 16 Miles W Lone Pine CA, elevation 10981 ft
@@ -38,11 +40,11 @@ _"Closure" here includes any safety notices, detours, updates, or hazards posted
 
 #### Number of closures in each region
 
-Your message:
+##### Your message:
 
 ```closures```
 
-Mouse's resonse:
+##### Mouse's resonse:
 
 ```text
 Closures by region: Southern California 5, Central California 0, Northern California 5, Oregon 1, Washington 3
@@ -50,11 +52,11 @@ Closures by region: Southern California 5, Central California 0, Northern Califo
 
 #### List of closures in a specific region
 
-Your message:
+##### Your message:
 
 ```closures northern california```
 
-Mouse's response:
+##### Mouse's response:
 
 ```text
 [1] Dec 20 2021 closure: Caldor Fire in the Lake Tahoe region
@@ -72,11 +74,11 @@ Mouse's response:
 
 _The number refers to which closure item in the list you would like to access._
 
-Your message:
+##### Your message:
 
 ```closures northern california 3```
 
-Mouse's response:
+##### Mouse's response:
 
 ```text
 Updated 12/10 9:20 AM
