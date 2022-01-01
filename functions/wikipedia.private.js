@@ -1,9 +1,20 @@
 const axios = require("axios").default;
+const startCase = require("lodash.startcase");
 
 const handleWikipediaInvocation = async (invocation, callback) => {
   const twiml = new Twilio.twiml.MessagingResponse();
 
-  const searchTerm = invocation.replace(/^wikipedia +/i, "");
+  // Use title casing on search terms, since sometimes Wikipedia's
+  // API won't perform a redirect for a non-properly-cased
+  // page (eg, searching for `northern california` or `joseph
+  // gordon levitt` result in failures, but searching for title-
+  // cased versions of these terms succeeds). Searching for
+  // title-cased versions of terms with out capital letters
+  // also succeeds (eg, `Pina Colada`).
+  // TO DO: Obviously, this will fail for words with internal
+  // capitalization (eg, `robert macnamara`); will need to
+  // fix in the future.
+  const searchTerm = startCase(invocation.replace(/^wikipedia +/i, ""));
 
   try {
     // https://stackoverflow.com/questions/8555320/is-there-a-wikipedia-api-just-for-retrieve-the-content-summary/18504997
