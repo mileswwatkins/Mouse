@@ -107,6 +107,11 @@ const handleRegionClosuresInvocation = async (region, callback) => {
     .get()
     .map((el) => parsePctaClosureType($(el).attr("class")));
 
+  if (closureTitles.length === 0) {
+    twiml.message("No closures found in this region");
+    return callback(null, twiml);
+  }
+
   closureTitles.forEach((title, index) => {
     const date = dateFns.format(new Date(closureDates[index]), "MMM d yyyy");
     const type = closureTypes[index];
@@ -172,7 +177,7 @@ const handleSpecificClosureInvocation = async (
     if (index === 0) {
       message += text;
     } else if (message.length < inReachMaxMessageLength) {
-      message = [message, text].join('\n');
+      message = [message, text].join("\n");
     } else {
     }
   });
