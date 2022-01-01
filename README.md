@@ -1,6 +1,6 @@
 # Mouse 🐭
 
-A Twilio Serverless chatbot to provide information to backcountry hikers via SMS, such as on Garmin InReach satellite communication devices.
+A chatbot to provide information to backcountry hikers via satellite SMS, such as on a Garmin InReach.
 
 <p align="center">
     <img src="https://github.com/mileswwatkins/Mouse/blob/main/README-weather-screenshot.png?raw=true" style="height: 400px;" />
@@ -86,6 +86,8 @@ The Pacific Crest Trail is closed near Warner Valley Road in the southern part o
 ```
 
 ## Development
+
+This project runs on the serverless architecture of Twilio Functions.
 
 ### Requirements
 
