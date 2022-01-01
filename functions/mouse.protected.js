@@ -1,4 +1,4 @@
-const { Twilio } = require("twilio");
+const Twilio = require("twilio");
 
 exports.handler = async function (context, event, callback) {
   // Need to use this syntax to `require` these `private`

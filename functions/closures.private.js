@@ -1,6 +1,10 @@
 const axios = require("axios").default;
 const cheerio = require("cheerio");
 const dateFns = require("date-fns");
+// For temporary use, while Cloudflare is blocking bot requests
+// on the actual PCTA website
+const { convertUrlToGoogleCacheUrl } = require(Runtime.getFunctions()["utils"]
+  .path);
 
 const inReachMaxMessageLength = 150;
 
@@ -45,7 +49,9 @@ const handleAllClosuresInvocation = async (callback) => {
   const twiml = new Twilio.twiml.MessagingResponse();
 
   const closuresResponse = await axios.get(
-    "https://www.pcta.org/discover-the-trail/closures/"
+    convertUrlToGoogleCacheUrl(
+      "https://www.pcta.org/discover-the-trail/closures/"
+    )
   );
   const $ = cheerio.load(closuresResponse.data);
 
@@ -85,7 +91,9 @@ const handleRegionClosuresInvocation = async (region, callback) => {
   }
 
   const closuresResponse = await axios.get(
-    `https://www.pcta.org/discover-the-trail/closures/${regionSlug}`
+    convertUrlToGoogleCacheUrl(
+      `https://www.pcta.org/discover-the-trail/closures/${regionSlug}`
+    )
   );
   const $ = cheerio.load(closuresResponse.data);
 
@@ -131,7 +139,9 @@ const handleSpecificClosureInvocation = async (
   }
 
   const regionResponse = await axios.get(
-    `https://www.pcta.org/discover-the-trail/closures/${regionSlug}`
+    convertUrlToGoogleCacheUrl(
+      `https://www.pcta.org/discover-the-trail/closures/${regionSlug}`
+    )
   );
   let $ = cheerio.load(regionResponse.data);
   const closureUrls = $("div.closure-wrap > a")
@@ -146,13 +156,15 @@ const handleSpecificClosureInvocation = async (
     return callback(null, twiml);
   }
 
-  const closureResponse = await axios.get(closureUrl);
+  const closureResponse = await axios.get(
+    convertUrlToGoogleCacheUrl(closureUrl)
+  );
   $ = cheerio.load(closureResponse.data);
 
   // Build a message for all body text through the first _substantive_
   // paragraph (eg, don't stop at a first paragraph that's just
   // "Updated 9/23 10:00 AM")
-  const paragraphTexts = $("article.closure-page > p")
+  const paragraphTexts = $("#content > div p")
     .get()
     .map((el) => $(el).text());
   let message = "";
@@ -160,7 +172,7 @@ const handleSpecificClosureInvocation = async (
     if (index === 0) {
       message += text;
     } else if (message.length < inReachMaxMessageLength) {
-      message += text;
+      message = [message, text].join('\n');
     } else {
     }
   });

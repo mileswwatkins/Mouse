@@ -27,7 +27,7 @@ const twoByteGsmCharacters = ["^", "€", "{", "}", "[", "]", "~", "\\"];
  * useful for some more complex unicode characters, eg 👩‍👩‍👦‍👦
  * https://stackoverflow.com/questions/25994001/how-to-calculate-byte-length-containing-utf8-characters-using-javascript
  */
-const getByteLength = (text) => new Blob([str]).size
+const getByteLength = (text) => new Blob([str]).size;
 
 const hasNonGsm7Characters = (text) =>
   text.some(
@@ -94,4 +94,11 @@ const splitMessage = (message) => {
   );
 
   return messages;
+};
+
+const convertUrlToGoogleCacheUrl = (url) =>
+  `http://webcache.googleusercontent.com/search?q=cache:${url}&strip=1&vwsrc=0`;
+
+module.exports = {
+  convertUrlToGoogleCacheUrl,
 };
