@@ -10,6 +10,8 @@ A chatbot to provide information to backcountry hikers via satellite SMS, such a
 
 Mouse is currently in beta, so you'll need to ask the developer (Miles Watkins) for Mouse's phone number. Once you have that phone number, you can text it from your Garmin InReach or other SMS-capable device.
 
+Please only use Mouse on your satellite communication device if you pay for a plan with unlimited text messages! Mouse's responses can be long (ie, multiple messages) and quickly eat up your plan otherwise.
+
 ## What can I ask Mouse?
 
 ### Weather forecasts
@@ -83,6 +85,20 @@ _The number refers to which closure item in the list you would like to access._
 ```text
 Updated 12/10 9:20 AM
 The Pacific Crest Trail is closed near Warner Valley Road in the southern part of Lassen National Park. The rest of the Dixie Fire closures have been lifted, but Lassen National Forest stated in their press release that a closure order may be reinstated once restoration work begins in spring 2022.
+```
+
+### Wikipedia
+
+You can fetch the first paragraph of any Wikipedia article. Note that searching for an ambiguous or overly broad term (eg, `Smith`) will not return useful results.
+
+##### Your message
+
+```wikipedia pokemon```
+
+##### Mouse's response
+
+```text
+Pokémon is a Japanese media franchise managed by The Pokémon Company, a company founded by Nintendo, Game Freak, and Creatures. The franchise was created by Satoshi Tajiri in 1996, and is centered on fictional creatures called "Pokémon". In Pokémon, humans, known as Pokémon Trainers, catch and train Pokémon to battle other Pokémon for sport. All media works within the franchise are set in the Pokémon universe. The English slogan for the franchise is "Gotta Catch ‘Em All!". There are currently 901 Pokémon species.
 ```
 
 ## Development

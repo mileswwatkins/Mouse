@@ -7,6 +7,8 @@ exports.handler = async function (context, event, callback) {
     .path);
   const handleClosuresInvocation = require(Runtime.getFunctions()["closures"]
     .path);
+  const handleWikipediaInvocation = require(Runtime.getFunctions()["wikipedia"]
+    .path);
 
   // Create an empty TwiML response, in case an error response
   // needs to be sent
@@ -53,9 +55,11 @@ exports.handler = async function (context, event, callback) {
     return await handleWeatherInvocation(inReachSlug, days, callback);
   } else if (invocation.includes("closures")) {
     return await handleClosuresInvocation(invocation, callback);
+  } else if (invocation.includes("wikipedia")) {
+    return await handleWikipediaInvocation(invocation, callback);
   } else {
     twiml.message(
-      "Error: Your text must include which information you want; available options: `weather`, `closures`"
+      "Error: Your text must include which information you want; available options: `weather`, `closures`, `wikipedia`"
     );
     return callback(null, twiml);
   }
