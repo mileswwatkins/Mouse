@@ -11,9 +11,6 @@ const handleWikipediaInvocation = async (invocation, callback) => {
   // cased versions of these terms succeeds). Searching for
   // title-cased versions of terms with out capital letters
   // also succeeds (eg, `Pina Colada`).
-  // TO DO: Obviously, this will fail for words with internal
-  // capitalization (eg, `robert macnamara`); will need to
-  // fix in the future.
   const searchTerm = startCase(invocation.replace(/^wikipedia +/i, ""));
 
   try {

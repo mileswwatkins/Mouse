@@ -56,8 +56,6 @@ const isMessageMultipart = (message) => {
   }
 };
 
-// TO DO: Deal with emojis and characters that consume more
-// than one character in UCS-2-encoded messages
 const splitMessage = (message) => {
   if (message.length === 0) {
     return [];

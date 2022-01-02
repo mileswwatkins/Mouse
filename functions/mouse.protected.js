@@ -14,11 +14,6 @@ exports.handler = async function (context, event, callback) {
   // needs to be sent
   const twiml = new Twilio.twiml.MessagingResponse();
 
-  // TO DO: Add a whitelist of phone numbers, and block all others,
-  // to avoid Twilio expenses. Numbers cannot actually be blocked
-  // in Twilio itself, unfortunately, but at least we can prevent
-  // sending unauthorized outbound messages.
-
   const incomingMessage = event.Body;
   if (typeof incomingMessage === "undefined") {
     twiml.message(
@@ -41,7 +36,6 @@ exports.handler = async function (context, event, callback) {
   }
   invocation = invocation.toLowerCase();
 
-  // TO DO: Add invocations for air quality, sports scores, Wikipedia
   if (invocation.includes("weather")) {
     if (inReachSlug === null) {
       twiml.message(
