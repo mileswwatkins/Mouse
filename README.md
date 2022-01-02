@@ -16,7 +16,7 @@ Please only use Mouse on your satellite communication device if you pay for a pl
 
 ### Weather forecasts
 
-_The user must have be using a Garmin InReach with location sharing turned on, in which case there will be an `inreachlink.com/#######` automatically appended to the message. This link can be used to determine your GPS location and thus fetch your weather forecast._
+_The user must be using a Garmin InReach with location sharing turned on, in which case there will be an `inreachlink.com/#######` automatically appended to each text message the user sends. This link can be used to determine your GPS location and thus fetch your weather forecast._
 
 ##### Your message
 
