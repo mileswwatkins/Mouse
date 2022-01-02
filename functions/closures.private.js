@@ -116,7 +116,7 @@ const handleRegionClosuresInvocation = async (region, callback) => {
     const date = dateFns.format(new Date(closureDates[index]), "MMM d yyyy");
     const type = closureTypes[index];
 
-    let message = `[${index + 1}] ${date} ${type}: ${title}`;
+    let message = `(${index + 1}) ${date} ${type}: ${title}`;
     if (message.length > inReachMaxMessageLength) {
       message = message.slice(0, inReachMaxMessageLength - 1) + "…";
     }
