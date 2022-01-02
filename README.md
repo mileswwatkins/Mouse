@@ -74,7 +74,7 @@ Closures by region: Southern California 5, Central California 0, Northern Califo
 
 #### Details on a specific closure
 
-_The number refers to which closure item in the list you would like to access._
+_The number refers to which closure item in the list you would like to access. Only the first paragraph of the closure notice is included._
 
 ##### Your message
 
