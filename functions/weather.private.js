@@ -1,4 +1,5 @@
 const axios = require("axios").default;
+const { getInReachSlug } = require(Runtime.getFunctions()["utils"].path);
 
 const inReachSlugToWeatherUrl = async (inReachSlug) => {
   const url = `http://inreachlink.com/${inReachSlug}`;
@@ -32,7 +33,7 @@ const buildIntroMessage = (weatherData, days) => {
   }
   // Keep consistency with the weather summaries, which all end
   // in a period
-  message = message + '.'
+  message = message + ".";
 
   return message;
 };
@@ -131,8 +132,19 @@ const buildWeatherMessages = (weatherData, days) => {
   });
 };
 
-const handleWeatherInvocation = async (inReachSlug, days, callback) => {
+const handleWeatherInvocation = async (invocation, callback) => {
   const twiml = new Twilio.twiml.MessagingResponse();
+
+  const inReachSlug = getInReachSlug(invocation);
+  if (!inReachSlug) {
+    twiml.message(
+      "Error: You must include your InReach location link in your text message"
+    );
+    return callback(null, twiml);
+  }
+
+  const daysMatch = invocation.match(/\d+/);
+  const days = Array.isArray(daysMatch) ? daysMatch[0] : 2;
 
   const weatherUrl = await inReachSlugToWeatherUrl(inReachSlug);
   if (weatherUrl === null) {

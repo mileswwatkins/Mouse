@@ -94,9 +94,23 @@ const splitMessage = (message) => {
   return messages;
 };
 
+const getInReachSlug = (message) => {
+  // The user may have location sharing turned on, in which case
+  // there will be an ` inreachlink.com/#######` before the
+  // `  - ${user's name}`
+  let inReachSlug = null;
+  if (message.includes("inreachlink.com")) {
+    inReachSlug = message.match(/inreachlink\.com\/([A-z|\d]{7})/)[1];
+    message = message.replace(inReachSlug, "");
+    inReachSlug = inReachSlug.toUpperCase();
+  }
+  return inReachSlug;
+};
+
 const convertUrlToGoogleCacheUrl = (url) =>
   `http://webcache.googleusercontent.com/search?q=cache:${url}&strip=1&vwsrc=0`;
 
 module.exports = {
   convertUrlToGoogleCacheUrl,
+  getInReachSlug,
 };

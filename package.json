@@ -3,9 +3,10 @@
   "version": "0.0.0",
   "private": true,
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "test": "jest",
     "start": "twilio-run",
-    "deploy": "twilio-run deploy"
+    "deploy": "twilio-run deploy",
+    "prepare": "husky install"
   },
   "dependencies": {
     "@twilio/runtime-handler": "1.2.1",
@@ -16,6 +17,9 @@
     "twilio": "^3.72.0"
   },
   "devDependencies": {
+    "husky": "^7.0.4",
+    "jest": "^27.4.7",
+    "prettier": "^2.5.1",
     "twilio-run": "^3.4.0"
   },
   "engines": {
