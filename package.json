@@ -3,7 +3,8 @@
   "version": "0.0.0",
   "private": true,
   "scripts": {
-    "test": "jest",
+    "test": "jest --testPathIgnorePatterns e2e",
+    "test-e2e": "jest __tests__/e2e.js",
     "start": "twilio-run",
     "deploy": "twilio-run deploy",
     "prepare": "husky install"
@@ -19,6 +20,7 @@
   "devDependencies": {
     "husky": "^7.0.4",
     "jest": "^27.4.7",
+    "jest-dev-server": "^6.0.3",
     "prettier": "^2.5.1",
     "twilio-run": "^3.4.0"
   },

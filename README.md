@@ -117,7 +117,7 @@ This project runs on the serverless architecture of Twilio Functions.
 ### Running locally
 
 ```sh
-twilio serverless:start
+npm run start
 ```
 
 Then, you should be able to make HTTP POST requests to `http://localhost:3000/mouse`, making sure to include your desired message in the `Body` property of your POST data, eg:

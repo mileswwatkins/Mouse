@@ -14,8 +14,8 @@ const handler = async function (context, event, callback) {
   // needs to be sent
   const twiml = new Twilio.twiml.MessagingResponse();
 
-  const rawMessage = event.Body;
-  if (typeof rawMessage === "undefined") {
+  const message = event.Body;
+  if (typeof message === "undefined") {
     twiml.message(
       "Error: No message found, make sure one is sent in the HTTP request"
     );
