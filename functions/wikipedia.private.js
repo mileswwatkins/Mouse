@@ -1,7 +1,7 @@
 const axios = require("axios").default;
 const startCase = require("lodash.startcase");
 
-const handleWikipediaInvocation = async (invocation, callback) => {
+const handleInvocation = async (invocation, callback) => {
   const twiml = new Twilio.twiml.MessagingResponse();
 
   // Use title casing on search terms, since sometimes Wikipedia's
@@ -42,4 +42,6 @@ const handleWikipediaInvocation = async (invocation, callback) => {
   }
 };
 
-module.exports = handleWikipediaInvocation;
+module.exports = {
+  handleInvocation,
+};

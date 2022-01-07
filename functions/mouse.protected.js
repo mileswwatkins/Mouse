@@ -3,13 +3,15 @@ const Twilio = require("twilio");
 const handler = async function (context, event, callback) {
   // Need to use this syntax to `require` these `private`
   // handler/helper functions
-  const handleWeatherInvocation = require(Runtime.getFunctions()["weather"]
-    .path);
-  const { handleClosuresInvocation } = require(Runtime.getFunctions()[
-    "closures"
-  ].path);
-  const handleWikipediaInvocation = require(Runtime.getFunctions()["wikipedia"]
-    .path);
+  const {
+    handleInvocation: handleWeatherInvocation,
+  } = require(Runtime.getFunctions()["weather"].path);
+  const {
+    handleInvocation: handleClosuresInvocation,
+  } = require(Runtime.getFunctions()["closures"].path);
+  const {
+    handleInvocation: handleWikipediaInvocation,
+  } = require(Runtime.getFunctions()["wikipedia"].path);
 
   const twiml = new Twilio.twiml.MessagingResponse();
 

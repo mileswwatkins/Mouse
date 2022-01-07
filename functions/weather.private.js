@@ -132,7 +132,7 @@ const buildWeatherMessages = (weatherData, days) => {
   });
 };
 
-const handleWeatherInvocation = async (invocation, callback) => {
+const handleInvocation = async (invocation, callback) => {
   const twiml = new Twilio.twiml.MessagingResponse();
 
   const inReachSlug = getInReachSlug(invocation);
@@ -163,4 +163,7 @@ const handleWeatherInvocation = async (invocation, callback) => {
   return callback(null, twiml);
 };
 
-module.exports = handleWeatherInvocation;
+module.exports = {
+  handleInvocation,
+  shortenDayName,
+};

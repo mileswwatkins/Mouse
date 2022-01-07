@@ -31,7 +31,7 @@ const parseRegionAndClosureNumber = (invocation) => {
   return { region, closureNumber };
 };
 
-const handleClosuresInvocation = async (invocation, callback) => {
+const handleInvocation = async (invocation, callback) => {
   const twiml = new Twilio.twiml.MessagingResponse();
 
   const { region, closureNumber } = parseRegionAndClosureNumber(invocation);
@@ -215,7 +215,7 @@ const buildSingleClosureMessage = (paragraphs) => {
 };
 
 module.exports = {
-  handleClosuresInvocation,
+  handleInvocation,
   parseRegionAndClosureNumber,
   buildSingleClosureMessage,
   buildRegionClosuresMessages,
