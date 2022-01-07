@@ -83,8 +83,7 @@ _The number refers to which closure item in the list you would like to access. O
 ##### Mouse's response
 
 ```text
-Updated 12/10 9:20 AM
-The Pacific Crest Trail is closed near Warner Valley Road in the southern part of Lassen National Park. The rest of the Dixie Fire closures have been lifted, but Lassen National Forest stated in their press release that a closure order may be reinstated once restoration work begins in spring 2022.
+Updated 12/10 9:20 AM The Pacific Crest Trail is closed near Warner Valley Road in the southern part of Lassen National Park. The rest of the Dixie Fire closures have been lifted, but Lassen National Forest stated in their press release that a closure order may be reinstated once restoration work begins in spring 2022.
 ```
 
 ### Wikipedia

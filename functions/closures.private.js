@@ -1,12 +1,15 @@
 const axios = require("axios").default;
 const cheerio = require("cheerio");
 const dateFns = require("date-fns");
-// For temporary use, while Cloudflare is blocking bot requests
-// on the actual PCTA website
-const { convertUrlToGoogleCacheUrl } = require(Runtime.getFunctions()["utils"]
-  .path);
-
-const inReachMaxMessageLength = 150;
+const {
+  maxLengthIfGsm7Encoding,
+  // For temporary use, while Cloudflare is blocking bot requests
+  // on the actual PCTA website
+  convertUrlToGoogleCacheUrl,
+} =
+  typeof Runtime === "undefined"
+    ? require("./utils.private.js")
+    : require(Runtime.getFunctions()["utils"].path);
 
 const pctaRegionUrlSlugs = {
   "southern california": "southern-california",
@@ -16,25 +19,34 @@ const pctaRegionUrlSlugs = {
   washington: "washington",
 };
 
-const parsePctaClosureType = (glyphClassName) =>
-  glyphClassName.includes("fa-ban")
-    ? "closure"
-    : glyphClassName.includes("fa-door-open")
-    ? "reopening"
-    : glyphClassName.includes("fa-exclamation-triangle")
-    ? "warning"
-    : "";
-
-const handleClosuresInvocation = async (invocation, callback) => {
-  const invocationParts = invocation.match(
+const parseRegionAndClosureNumber = (invocation) => {
+  let [_invocation, region, closureNumber] = invocation.match(
     /^closures ?(southern california|central california|northern california|oregon|washington)? ?(\d+)?/i
   );
-  const region = invocationParts[1];
-  const closureNumber = invocationParts[2];
 
-  if (!region && !closureNumber) {
+  if (typeof closureNumber !== "undefined") {
+    closureNumber = parseInt(closureNumber);
+  }
+
+  return { region, closureNumber };
+};
+
+const handleClosuresInvocation = async (invocation, callback) => {
+  const twiml = new Twilio.twiml.MessagingResponse();
+
+  const { region, closureNumber } = parseRegionAndClosureNumber(invocation);
+
+  if (
+    typeof region !== "undefined" &&
+    !Object.keys(pctaRegionUrlSlugs).includes(region)
+  ) {
+    twiml.message(`Error: Unknown region provided: \`${region}\``);
+    return callback(null, twiml);
+  }
+
+  if (typeof region === "undefined" && typeof closureNumber === "undefined") {
     return await handleAllClosuresInvocation(callback);
-  } else if (region && !closureNumber) {
+  } else if (region && typeof closureNumber === "undefined") {
     return await handleRegionClosuresInvocation(region, callback);
   } else {
     return await handleSpecificClosureInvocation(
@@ -85,11 +97,6 @@ const handleRegionClosuresInvocation = async (region, callback) => {
   const twiml = new Twilio.twiml.MessagingResponse();
 
   const regionSlug = pctaRegionUrlSlugs[region.toLowerCase()];
-  if (!regionSlug) {
-    twiml.message(`Error: Unknown region provided: \`${region}\``);
-    return callback(null, twiml);
-  }
-
   const closuresResponse = await axios.get(
     convertUrlToGoogleCacheUrl(
       `https://www.pcta.org/discover-the-trail/closures/${regionSlug}`
@@ -103,26 +110,22 @@ const handleRegionClosuresInvocation = async (region, callback) => {
   const closureDates = $("div.closure-wrap > a > div.closure-date")
     .get()
     .map((el) => $(el).text());
-  const closureTypes = $("div.closure-wrap > a > i.closure-type")
+  const closureClasses = $("div.closure-wrap > a > i.closure-type")
     .get()
-    .map((el) => parsePctaClosureType($(el).attr("class")));
+    .map((el) => $(el).attr("class"));
 
   if (closureTitles.length === 0) {
     twiml.message("No closures found in this region");
     return callback(null, twiml);
   }
 
-  closureTitles.forEach((title, index) => {
-    const date = dateFns.format(new Date(closureDates[index]), "MMM d yyyy");
-    const type = closureTypes[index];
-
-    let message = `(${index + 1}) ${date} ${type}: ${title}`;
-    if (message.length > inReachMaxMessageLength) {
-      message = message.slice(0, inReachMaxMessageLength - 1) + "…";
-    }
-    twiml.message(message);
+  buildRegionClosuresMessages(
+    closureTitles,
+    closureDates,
+    closureClasses
+  ).forEach((m) => {
+    twiml.message(m);
   });
-
   twiml.message(
     "To get more information for a closure, text the region and that closure's number (eg, `closures central california 3`)"
   );
@@ -138,11 +141,6 @@ const handleSpecificClosureInvocation = async (
   const twiml = new Twilio.twiml.MessagingResponse();
 
   const regionSlug = pctaRegionUrlSlugs[region.toLowerCase()];
-  if (!regionSlug) {
-    twiml.message(`Error: Unknown region provided: \`${region}\``);
-    return callback(null, twiml);
-  }
-
   const regionResponse = await axios.get(
     convertUrlToGoogleCacheUrl(
       `https://www.pcta.org/discover-the-trail/closures/${regionSlug}`
@@ -166,24 +164,59 @@ const handleSpecificClosureInvocation = async (
   );
   $ = cheerio.load(closureResponse.data);
 
-  // Build a message for all body text through the first _substantive_
-  // paragraph (eg, don't stop at a first paragraph that's just
-  // "Updated 9/23 10:00 AM")
-  const paragraphTexts = $("#content > div p")
+  const paragraphs = $("#content > div p")
     .get()
     .map((el) => $(el).text());
-  let message = "";
-  paragraphTexts.forEach((text, index) => {
-    if (index === 0) {
-      message += text;
-    } else if (message.length < inReachMaxMessageLength) {
-      message = [message, text].join("\n");
-    } else {
-    }
-  });
-  twiml.message(message);
+  twiml.message(buildSingleClosureMessage(paragraphs));
 
   return callback(null, twiml);
 };
 
-module.exports = handleClosuresInvocation;
+const buildRegionClosuresMessages = (titles, dates, classes) => {
+  const messages = [];
+
+  const parsePctaClosureType = (glyphClassName) =>
+    glyphClassName.includes("fa-ban")
+      ? "closure"
+      : glyphClassName.includes("fa-door-open")
+      ? "reopening"
+      : glyphClassName.includes("fa-exclamation-triangle")
+      ? "warning"
+      : "";
+
+  titles.forEach((title, index) => {
+    const date = dateFns.format(new Date(dates[index]), "MMM d, yyyy");
+    const type = parsePctaClosureType(classes[index]);
+
+    let message = `(${index + 1}) ${date} ${type}: ${title}`;
+    if (message.length > maxLengthIfGsm7Encoding) {
+      message = message.slice(0, maxLengthIfGsm7Encoding - 4) + "...";
+    }
+    messages.push(message);
+  });
+  return messages;
+};
+
+const buildSingleClosureMessage = (paragraphs) => {
+  // Build a message for all body text through the first _substantive_
+  // paragraph (eg, don't stop at a first paragraph that's just
+  // "Updated 9/23 10:00 AM")
+  let message = "";
+  paragraphs.forEach((text, index) => {
+    if (index === 0) {
+      message += text;
+    } else if (message.length < maxLengthIfGsm7Encoding) {
+      message = [message, text].join(" ");
+    } else {
+      return;
+    }
+  });
+  return message;
+};
+
+module.exports = {
+  handleClosuresInvocation,
+  parseRegionAndClosureNumber,
+  buildSingleClosureMessage,
+  buildRegionClosuresMessages,
+};

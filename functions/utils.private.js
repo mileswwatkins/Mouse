@@ -113,4 +113,5 @@ const convertUrlToGoogleCacheUrl = (url) =>
 module.exports = {
   convertUrlToGoogleCacheUrl,
   getInReachSlug,
+  maxLengthIfGsm7Encoding,
 };

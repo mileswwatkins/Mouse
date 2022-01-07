@@ -5,13 +5,12 @@ const handler = async function (context, event, callback) {
   // handler/helper functions
   const handleWeatherInvocation = require(Runtime.getFunctions()["weather"]
     .path);
-  const handleClosuresInvocation = require(Runtime.getFunctions()["closures"]
-    .path);
+  const { handleClosuresInvocation } = require(Runtime.getFunctions()[
+    "closures"
+  ].path);
   const handleWikipediaInvocation = require(Runtime.getFunctions()["wikipedia"]
     .path);
 
-  // Create an empty TwiML response, in case an error response
-  // needs to be sent
   const twiml = new Twilio.twiml.MessagingResponse();
 
   const message = event.Body;
