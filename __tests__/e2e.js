@@ -16,7 +16,7 @@ beforeAll(
 
 afterAll(async () => await teardownDevServer());
 
-const createRequestPromise = async (message) =>
+const getResponseBody = async (message) =>
   await (
     await axios({
       method: "POST",
@@ -28,18 +28,20 @@ const createRequestPromise = async (message) =>
     })
   ).data;
 
+const getMessages = (xml) => xml.match(/<Message>(.+?)<\/Message>/g);
+
 test("all closures invocation", async () => {
-  const messageXml = await createRequestPromise("closures");
+  const messageXml = await getResponseBody("closures pct");
   const messageXmlWithoutCounts = messageXml.replace(/ [0-9]+/g, " X");
 
   expect(messageXmlWithoutCounts).toBe(
-    '<?xml version="1.0" encoding="UTF-8"?><Response><Message>Closures by region: Southern California X, Central California X, Northern California X, Oregon X, Washington X</Message><Message>To get a list of all closures in a region, include that region\'s name in your text (eg, text `closures central california`)</Message></Response>'
+    '<?xml version="1.0" encoding="UTF-8"?><Response><Message>Closures by region: Southern California X, Central California X, Northern California X, Oregon X, Washington X</Message><Message>To get a list of all PCT closures in a region, include that region\'s name in your text (eg, text `closures pct oregon`)</Message></Response>'
   );
 });
 
 test("region closures invocation", async () => {
-  const messageXml = await createRequestPromise("closures northern california");
-  const messages = messageXml.match(/<Message>(.+?)<\/Message>/g);
+  const messageXml = await getResponseBody("closures pct southern california");
+  const messages = getMessages(messageXml);
 
   expect(messages.length).toBeGreaterThan(1);
   messages.slice(0, messages.length - 1).forEach((m) => {
@@ -48,9 +50,7 @@ test("region closures invocation", async () => {
 });
 
 test("specific closure invocation", async () => {
-  const messageXml = await createRequestPromise(
-    "closures northern california 1"
-  );
+  const messageXml = await getResponseBody("closures northern california 1");
 
   expect(messageXml).toMatch(
     /<\?xml version="1.0" encoding="UTF-8"\?><Response><Message>.+<\/Message><\/Response>/
@@ -58,10 +58,8 @@ test("specific closure invocation", async () => {
 });
 
 test("weather invocation", async () => {
-  const messageXml = await createRequestPromise(
-    "weather inreachlink.com/JSLQXHR"
-  );
-  const messages = messageXml.match(/<Message>(.+?)<\/Message>/g);
+  const messageXml = await getResponseBody("weather inreachlink.com/JSLQXHR");
+  const messages = getMessages(messageXml);
 
   expect(messages[0]).toMatch(/\d-day forecast for .+/);
   messages.slice(1).forEach((m) => {
@@ -70,7 +68,7 @@ test("weather invocation", async () => {
 });
 
 test("wikipedia invocation", async () => {
-  const messageXml = await createRequestPromise("wikipedia pokemon");
+  const messageXml = await getResponseBody("wikipedia pokemon");
 
   expect(messageXml).toMatch(
     /<\?xml version="1.0" encoding="UTF-8"\?><Response><Message>.+<\/Message><\/Response>/

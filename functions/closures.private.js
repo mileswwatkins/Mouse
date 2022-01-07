@@ -1,129 +1,154 @@
-const axios = require("axios").default;
-const cheerio = require("cheerio");
-const dateFns = require("date-fns");
-const {
-  maxLengthIfGsm7Encoding,
-  // For temporary use, while Cloudflare is blocking bot requests
-  // on the actual PCTA website
-  convertUrlToGoogleCacheUrl,
-} =
+const { maxLengthIfGsm7Encoding } =
   typeof Runtime === "undefined"
     ? require("./utils.private.js")
     : require(Runtime.getFunctions()["utils"].path);
+const {
+  makeAllClosuresMessage: makePctAllClosuresMessage,
+  getRegionClosuresData: getPctRegionClosuresData,
+  getSpecificClosureInfo: getPctSpecificClosureInfo,
+} = typeof Runtime === "undefined"
+  ? require("./closures-pct.private.js")
+  : require(Runtime.getFunctions()["closures-pct"].path);
 
-const pctaRegionUrlSlugs = {
-  "southern california": "southern-california",
-  "central california": "central-california",
-  "northern california": "northern-california",
-  oregon: "oregon",
-  washington: "washington",
+const availableTrailsAndRegions = {
+  at: [
+    "maine",
+    "new hampshire",
+    "vermont",
+    "massachusetts",
+    "connecticut",
+    "new york",
+    "new jersey",
+    "pennsylvania",
+    "maryland",
+    "west virginia",
+    "virginia",
+    "tennessee",
+    "north carolina",
+    "georgia",
+  ],
+  pct: [
+    "southern california",
+    "central california",
+    "northern california",
+    "oregon",
+    "washington",
+  ],
 };
 
-const parseRegionAndClosureNumber = (invocation) => {
-  let [_invocation, region, closureNumber] = invocation.match(
-    /^closures ?(southern california|central california|northern california|oregon|washington)? ?(\d+)?/i
+const parseClosureInvocation = (invocation) => {
+  const availableTrails = Object.keys(availableTrailsAndRegions);
+  const availableRegions = Object.values(availableTrailsAndRegions).reduce(
+    (acc, one) => {
+      return acc.concat(one);
+    },
+    []
   );
+
+  const match = invocation.match(
+    new RegExp(
+      // prettier-ignore
+      `^closures ?(${availableTrails.join("|")})? ?(${availableRegions.join("|")})? ?(\\d+)?$`,
+      "i"
+    )
+  );
+
+  if (!(match instanceof Array)) {
+    return {};
+  }
+  let [_invocation, trail, region, closureNumber] = match;
 
   if (typeof closureNumber !== "undefined") {
     closureNumber = parseInt(closureNumber);
   }
 
-  return { region, closureNumber };
+  return { trail, region, closureNumber };
 };
 
 const handleInvocation = async (invocation, callback) => {
   const twiml = new Twilio.twiml.MessagingResponse();
 
-  const { region, closureNumber } = parseRegionAndClosureNumber(invocation);
+  const { trail, region, closureNumber } = parseClosureInvocation(invocation);
 
   if (
-    typeof region !== "undefined" &&
-    !Object.keys(pctaRegionUrlSlugs).includes(region)
+    typeof trail !== "undefined" &&
+    !Object.keys(availableTrailsAndRegions).includes(trail)
   ) {
-    twiml.message(`Error: Unknown region provided: \`${region}\``);
+    twiml.message(`Error: Unknown trail provided: \`${trail}\``);
     return callback(null, twiml);
   }
 
-  if (typeof region === "undefined" && typeof closureNumber === "undefined") {
-    return await handleAllClosuresInvocation(callback);
-  } else if (region && typeof closureNumber === "undefined") {
-    return await handleRegionClosuresInvocation(region, callback);
-  } else {
+  if (
+    typeof trail !== "undefined" &&
+    typeof region !== "undefined" &&
+    !availableTrailsAndRegions[trail].includes(region)
+  ) {
+    twiml.message(
+      `Error: \`${region}\` is not a valid region for the ${trail.toUpperCase()}`
+    );
+    return callback(null, twiml);
+  }
+
+  if (
+    typeof trail === "undefined" &&
+    typeof region === "undefined" &&
+    typeof closureNumber === "undefined"
+  ) {
+    twiml.message(
+      "Please identify which trail you want closure information about: ie, `closures pct` or `closures at`"
+    );
+    return callback(null, twiml);
+  } else if (
+    typeof region === "undefined" &&
+    typeof closureNumber === "undefined"
+  ) {
+    return await handleAllClosuresInvocation(trail, callback);
+  } else if (typeof closureNumber === "undefined") {
+    return await handleRegionClosuresInvocation(trail, region, callback);
+  } else if (
+    typeof trail !== "undefined" &&
+    typeof region !== "undefined" &&
+    typeof closureNumber !== "undefined"
+  ) {
     return await handleSpecificClosureInvocation(
+      trail,
       region,
       closureNumber,
       callback
     );
+  } else {
+    twiml.message(
+      "Error: invalid syntax for closures; please try the format of `closures pct`, `closures at maine`, or `closures pct oregon 2`"
+    );
+    return callback(null, twiml);
   }
 };
 
-const handleAllClosuresInvocation = async (callback) => {
+const handleAllClosuresInvocation = async (trail, callback) => {
   const twiml = new Twilio.twiml.MessagingResponse();
 
-  const closuresResponse = await axios.get(
-    convertUrlToGoogleCacheUrl(
-      "https://www.pcta.org/discover-the-trail/closures/"
-    )
-  );
-  const $ = cheerio.load(closuresResponse.data);
+  const message = trail === "pct" ? await makePctAllClosuresMessage() : "";
 
-  const regionNames = $(".closure-region > div.text-overlay")
-    .get()
-    .map((el) => $(el).text());
-  const closureCounts = $(".closure-region > div.region-count")
-    .get()
-    .map((el) => $(el).text());
-
-  const southernCaliforniaClosures =
-    closureCounts[regionNames.indexOf("Southern California")];
-  const centralCaliforniaClosures =
-    closureCounts[regionNames.indexOf("Central California")];
-  const northernCaliforniaClosures =
-    closureCounts[regionNames.indexOf("Northern California")];
-  const oregonClosures = closureCounts[regionNames.indexOf("Oregon")];
-  const washingtonClosures = closureCounts[regionNames.indexOf("Washington")];
-
+  twiml.message(message);
   twiml.message(
-    `Closures by region: Southern California ${southernCaliforniaClosures}, Central California ${centralCaliforniaClosures}, Northern California ${northernCaliforniaClosures}, Oregon ${oregonClosures}, Washington ${washingtonClosures}`
-  );
-  twiml.message(
-    "To get a list of all closures in a region, include that region's name in your text (eg, text `closures central california`)"
+    `To get a list of all ${trail.toUpperCase()} closures in a region, include that region's name in your text (eg, text \`closures pct oregon\`)`
   );
 
   return callback(null, twiml);
 };
 
-const handleRegionClosuresInvocation = async (region, callback) => {
+const handleRegionClosuresInvocation = async (trail, region, callback) => {
   const twiml = new Twilio.twiml.MessagingResponse();
 
-  const regionSlug = pctaRegionUrlSlugs[region.toLowerCase()];
-  const closuresResponse = await axios.get(
-    convertUrlToGoogleCacheUrl(
-      `https://www.pcta.org/discover-the-trail/closures/${regionSlug}`
-    )
-  );
-  const $ = cheerio.load(closuresResponse.data);
+  const { titles, dates, types } =
+    trail === "pct" ? await getPctRegionClosuresData(region) : {};
 
-  const closureTitles = $("div.closure-wrap > a > div.closure-title > h2")
-    .get()
-    .map((el) => $(el).text());
-  const closureDates = $("div.closure-wrap > a > div.closure-date")
-    .get()
-    .map((el) => $(el).text());
-  const closureClasses = $("div.closure-wrap > a > i.closure-type")
-    .get()
-    .map((el) => $(el).attr("class"));
-
-  if (closureTitles.length === 0) {
-    twiml.message("No closures found in this region");
+  if (titles.length === 0) {
+    twiml.message("No closures found for this region");
     return callback(null, twiml);
   }
 
-  buildRegionClosuresMessages(
-    closureTitles,
-    closureDates,
-    closureClasses
-  ).forEach((m) => {
+  buildRegionClosuresMessages(titles, dates, types).forEach((m) => {
     twiml.message(m);
   });
   twiml.message(
@@ -134,61 +159,37 @@ const handleRegionClosuresInvocation = async (region, callback) => {
 };
 
 const handleSpecificClosureInvocation = async (
+  trail,
   region,
   closureNumber,
   callback
 ) => {
   const twiml = new Twilio.twiml.MessagingResponse();
 
-  const regionSlug = pctaRegionUrlSlugs[region.toLowerCase()];
-  const regionResponse = await axios.get(
-    convertUrlToGoogleCacheUrl(
-      `https://www.pcta.org/discover-the-trail/closures/${regionSlug}`
-    )
-  );
-  let $ = cheerio.load(regionResponse.data);
-  const closureUrls = $("div.closure-wrap > a")
-    .get()
-    .map((el) => $(el).attr("href"));
+  const info =
+    trail === "pct"
+      ? await getPctSpecificClosureInfo(region, closureNumber)
+      : "";
 
-  const closureUrl = closureUrls[closureNumber - 1];
-  if (!closureUrl) {
-    twiml.message(
-      `Error: Invalid closure number provided; valid numbers are 1 through ${closureUrls.length}`
-    );
+  if (info instanceof Error) {
+    twiml.message(info.message);
     return callback(null, twiml);
   }
 
-  const closureResponse = await axios.get(
-    convertUrlToGoogleCacheUrl(closureUrl)
-  );
-  $ = cheerio.load(closureResponse.data);
-
-  const paragraphs = $("#content > div p")
-    .get()
-    .map((el) => $(el).text());
-  twiml.message(buildSingleClosureMessage(paragraphs));
+  twiml.message(buildSpecificClosureMessage(paragraphs));
 
   return callback(null, twiml);
 };
 
-const buildRegionClosuresMessages = (titles, dates, classes) => {
+const buildRegionClosuresMessages = (titles, dates, types) => {
   const messages = [];
 
-  const parsePctaClosureType = (glyphClassName) =>
-    glyphClassName.includes("fa-ban")
-      ? "closure"
-      : glyphClassName.includes("fa-door-open")
-      ? "reopening"
-      : glyphClassName.includes("fa-exclamation-triangle")
-      ? "warning"
-      : "";
-
   titles.forEach((title, index) => {
-    const date = dateFns.format(new Date(dates[index]), "MMM d, yyyy");
-    const type = parsePctaClosureType(classes[index]);
+    // Appalachian Trail closures do not have a date attached
+    const date = typeof dates[index] === "string" ? dates[index] : "";
+    const type = types[index];
 
-    let message = `(${index + 1}) ${date} ${type}: ${title}`;
+    let message = `(${index + 1})${date ? ` ${date}` : ""} ${type}: ${title}`;
     if (message.length > maxLengthIfGsm7Encoding) {
       message = message.slice(0, maxLengthIfGsm7Encoding - 4) + "...";
     }
@@ -197,7 +198,7 @@ const buildRegionClosuresMessages = (titles, dates, classes) => {
   return messages;
 };
 
-const buildSingleClosureMessage = (paragraphs) => {
+const buildSpecificClosureMessage = (paragraphs) => {
   // Build a message for all body text through the first _substantive_
   // paragraph (eg, don't stop at a first paragraph that's just
   // "Updated 9/23 10:00 AM")
@@ -216,7 +217,7 @@ const buildSingleClosureMessage = (paragraphs) => {
 
 module.exports = {
   handleInvocation,
-  parseRegionAndClosureNumber,
-  buildSingleClosureMessage,
+  parseClosureInvocation,
+  buildSpecificClosureMessage,
   buildRegionClosuresMessages,
 };
