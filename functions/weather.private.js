@@ -1,7 +1,10 @@
 const axios = require("axios").default;
-const { getInReachSlug } = require(Runtime.getFunctions()["utils"].path);
+const { getInReachSlug } =
+  typeof Runtime === "undefined"
+    ? require("./utils.private.js")
+    : require(Runtime.getFunctions()["utils"].path);
 
-const inReachSlugToWeatherUrl = async (inReachSlug) => {
+const getLatLngFromInReach = async (inReachSlug) => {
   const url = `http://inreachlink.com/${inReachSlug}`;
   const inReachData = await (await axios.get(url)).data;
 
@@ -10,30 +13,28 @@ const inReachSlugToWeatherUrl = async (inReachSlug) => {
   try {
     latitude = inReachData.match(/\s+lat : (-?\d+\.\d+),/)[1];
     longitude = inReachData.match(/\s+lon : (-?\d+\.\d+),/)[1];
+
+    console.debug(
+      `Determined InReach location to be: lat ${latitude}, lon ${longitude}`
+    );
   } catch {
     console.error(`Failed to find latitude and longitude from ${url}`);
-    return null;
   }
 
-  console.debug(
-    `Determined InReach location to be: lat ${latitude}, lon ${longitude}`
-  );
-
-  return `https://forecast.weather.gov/MapClick.php?lat=${latitude}&lon=${longitude}&FcstType=json`;
+  return { latitude, longitude };
 };
 
-const buildIntroMessage = (weatherData, days) => {
-  const location = weatherData.location.areaDescription;
-  const elevation = weatherData.location.elevation;
-  const hazards = weatherData.data.hazard;
+const buildWeatherUrl = (latitude, longitude) =>
+  `https://forecast.weather.gov/MapClick.php?lat=${latitude}&lon=${longitude}&FcstType=json`;
 
+const buildIntroMessage = (location, elevation, hazards, days) => {
   let message = `${days}-day forecast for ${location}, elevation ${elevation} ft`;
   if (hazards.length) {
-    message += `; current warnings: ${hazards.join(", ")}`;
+    message += `; warnings: ${hazards.join(", ")}`;
   }
   // Keep consistency with the weather summaries, which all end
   // in a period
-  message = message + ".";
+  message += ".";
 
   return message;
 };
@@ -119,16 +120,10 @@ const shortenWeather = (weather) => {
   return shortenedWeather;
 };
 
-const buildWeatherMessages = (weatherData, days) => {
-  const names = weatherData.time.startPeriodName;
-  const weathers = weatherData.data.text;
-
+const buildWeatherMessages = (names, weathers, days) => {
   const messageCount = Math.min(days * 2, names.length);
-
   return names.slice(0, messageCount).map((name, index) => {
-    const shortenedName = shortenDayName(name);
-    const shortenedWeather = shortenWeather(weathers[index].trim());
-    return `${shortenedName}: ${shortenedWeather}`;
+    return `${name}: ${weathers[index]}`;
   });
 };
 
@@ -144,19 +139,32 @@ const handleInvocation = async (invocation, callback) => {
   }
 
   const daysMatch = invocation.match(/\d+/);
-  const days = Array.isArray(daysMatch) ? daysMatch[0] : 2;
+  const days = Array.isArray(daysMatch) ? parseInt(daysMatch[0]) : 2;
 
-  const weatherUrl = await inReachSlugToWeatherUrl(inReachSlug);
-  if (weatherUrl === null) {
+  const { latitude, longitude } = await getLatLngFromInReach(inReachSlug);
+  if (typeof latitude === "undefined" || typeof longitude === "undefined") {
     twiml.message(
       "Failed to load InReach location, please try again in a few minutes"
     );
     return callback(null, twiml);
   }
+
+  const weatherUrl = buildWeatherUrl(latitude, longitude);
   const weatherData = await (await axios.get(weatherUrl)).data;
 
-  twiml.message(buildIntroMessage(weatherData, days));
-  buildWeatherMessages(weatherData, days).forEach((message) => {
+  twiml.message(
+    buildIntroMessage(
+      weatherData.location.areaDescription,
+      weatherData.location.elevation,
+      weatherData.data.hazard,
+      days
+    )
+  );
+  buildWeatherMessages(
+    weatherData.time.startPeriodName.map(shortenDayName),
+    weatherData.data.text.map(shortenDayName).map(trim),
+    days
+  ).forEach((message) => {
     twiml.message(message);
   });
 
@@ -166,4 +174,7 @@ const handleInvocation = async (invocation, callback) => {
 module.exports = {
   handleInvocation,
   shortenDayName,
+  buildIntroMessage,
+  shortenWeather,
+  buildWeatherMessages,
 };
