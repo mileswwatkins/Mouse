@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "test": "jest --testPathIgnorePatterns e2e",
-    "test-e2e": "jest __tests__/e2e.js",
+    "test-e2e": "jest __tests__/e2e.js --testTimeout 20000",
     "start": "twilio-run",
     "deploy": "twilio-run deploy",
     "prepare": "husky install"
