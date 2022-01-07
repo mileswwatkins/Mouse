@@ -162,7 +162,7 @@ const handleInvocation = async (invocation, callback) => {
   );
   buildWeatherMessages(
     weatherData.time.startPeriodName.map(shortenDayName),
-    weatherData.data.text.map(shortenDayName).map(trim),
+    weatherData.data.text.map(shortenDayName).map((i) => i.trim()),
     days
   ).forEach((message) => {
     twiml.message(message);
