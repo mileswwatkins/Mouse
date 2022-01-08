@@ -106,12 +106,21 @@ This project runs on the serverless architecture of Twilio Functions.
 
 ### Requirements
 
-- A Twilio account and active phone number
 - Node 12
 - `npm install`
 - `npm install twilio-cli --global`
-- `twilio login`
 - `twilio plugins:install @twilio-labs/plugin-serverless`
+
+And if you want to deploy instead of just running/testing locally, then also:
+
+- A Twilio account and active phone number
+- `twilio login`
+
+### Tests
+
+- `npm run test` runs all unit tests
+- `npm run test-watch` runs a daemon that runs tests for all files that have changed since your last Git commit
+- `npm run test-e2e` runs the end-to-end tests, that make actual HTTP requests
 
 ### Running locally
 
