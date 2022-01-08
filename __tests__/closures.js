@@ -41,7 +41,7 @@ describe("build specific closure message", () => {
       "The Deep Creek Area Closure includes Splinters Cabin Trailhead/Picnic Area, a portion of Deep Creek, and roads in the area. The closure includes Deep Creek and 50 feet out from both sides between Hook Creek and Devils Hole, Splinters Cabin Spur Trail (2W22), and Splinters Cabin Road (3N34C) amongst other areas.",
       "Hikers on the PCT may pass through the area, provided they enter and exit outside of the closure area, however hikers with a valid PCT Long-distance Permit may use Splinters Cabin Spur Trail and Splinters Cabin Road.",
     ];
-    const message = buildSpecificClosureMessage(paragraphs);
+    const message = buildSpecificClosureMessage(paragraphs.join("\n"));
     expect(message).toBe(paragraphs[0]);
   });
 
@@ -51,19 +51,20 @@ describe("build specific closure message", () => {
       "The Deep Creek Area Closure includes Splinters Cabin Trailhead/Picnic Area, a portion of Deep Creek, and roads in the area. The closure includes Deep Creek and 50 feet out from both sides between Hook Creek and Devils Hole, Splinters Cabin Spur Trail (2W22), and Splinters Cabin Road (3N34C) amongst other areas.",
       "Hikers on the PCT may pass through the area, provided they enter and exit outside of the closure area, however hikers with a valid PCT Long-distance Permit may use Splinters Cabin Spur Trail and Splinters Cabin Road.",
     ];
-    const message = buildSpecificClosureMessage(paragraphs);
+    const message = buildSpecificClosureMessage(paragraphs.join("\n"));
     expect(message).toBe(paragraphs[0] + " " + paragraphs[1]);
   });
 });
 
 test("build region closure messages", () => {
-  const titles = ["Foo", "Bar", "Baz"];
-  const dates = ["Dec 20, 2021", "Dec 14, 2021", "Jun 23, 2021"];
-  const types = ["closure", "reopening", "warning"];
+  const titles = ["Foo", "Bar", "Baz", "Qux"];
+  const dates = ["Dec 20, 2021", null, "Jun 23, 2021", null];
+  const types = ["closure", "reopening", null, null];
 
   const messages = buildRegionClosuresMessages(titles, dates, types);
   expect(messages.length).toBe(titles.length);
   expect(messages[0]).toBe("(1) Dec 20, 2021 closure: Foo");
-  expect(messages[1]).toBe("(2) Dec 14, 2021 reopening: Bar");
-  expect(messages[2]).toBe("(3) Jun 23, 2021 warning: Baz");
+  expect(messages[1]).toBe("(2) reopening: Bar");
+  expect(messages[2]).toBe("(3) Jun 23, 2021: Baz");
+  expect(messages[3]).toBe("(4) Qux");
 });

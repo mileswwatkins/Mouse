@@ -30,31 +30,68 @@ const getResponseBody = async (message) =>
 
 const getMessages = (xml) => xml.match(/<Message>(.+?)<\/Message>/g);
 
-test("all closures invocation", async () => {
-  const messageXml = await getResponseBody("closures pct");
-  const messageXmlWithoutCounts = messageXml.replace(/ [0-9]+/g, " X");
+describe("closure invocations", () => {
+  describe("Pacific Crest Trail", () => {
+    test("all closures invocation", async () => {
+      const messageXml = await getResponseBody("closures pct");
+      const messageXmlWithoutCounts = messageXml.replace(/ [0-9]+/g, " X");
 
-  expect(messageXmlWithoutCounts).toBe(
-    '<?xml version="1.0" encoding="UTF-8"?><Response><Message>Closures by region: Southern California X, Central California X, Northern California X, Oregon X, Washington X</Message><Message>To get a list of all PCT closures in a region, include that region\'s name in your text (eg, text `closures pct oregon`)</Message></Response>'
-  );
-});
+      expect(messageXmlWithoutCounts).toBe(
+        '<?xml version="1.0" encoding="UTF-8"?><Response><Message>Closures by region: Southern California X, Central California X, Northern California X, Oregon X, Washington X</Message><Message>To get a list of all PCT closures in a region, include that region\'s name in your text (eg, `closures pct oregon`)</Message></Response>'
+      );
+    });
 
-test("region closures invocation", async () => {
-  const messageXml = await getResponseBody("closures pct southern california");
-  const messages = getMessages(messageXml);
+    test("region closures invocation", async () => {
+      const messageXml = await getResponseBody(
+        "closures pct southern california"
+      );
+      const messages = getMessages(messageXml);
 
-  expect(messages.length).toBeGreaterThan(1);
-  messages.slice(0, messages.length - 1).forEach((m) => {
-    expect(m).toMatch(/\(\d+\) .+/);
+      expect(messages.length).toBeGreaterThan(1);
+      messages.slice(0, messages.length - 1).forEach((m) => {
+        expect(m).toMatch(/\(\d+\) .+/);
+      });
+    });
+
+    test("specific closure invocation", async () => {
+      const messageXml = await getResponseBody(
+        "closures pct southern california 1"
+      );
+
+      expect(messageXml).toMatch(
+        /<\?xml version="1.0" encoding="UTF-8"\?><Response><Message>.+<\/Message><\/Response>/
+      );
+    });
   });
-});
 
-test("specific closure invocation", async () => {
-  const messageXml = await getResponseBody("closures northern california 1");
+  describe("Appalachian Trail", () => {
+    test("all closures invocation", async () => {
+      const messageXml = await getResponseBody("closures at");
+      const messageXmlWithoutCounts = messageXml.replace(/ [0-9]+/g, " X");
 
-  expect(messageXml).toMatch(
-    /<\?xml version="1.0" encoding="UTF-8"\?><Response><Message>.+<\/Message><\/Response>/
-  );
+      expect(messageXmlWithoutCounts).toBe(
+        '<?xml version="1.0" encoding="UTF-8"?><Response><Message>Closures by region: trailwide X, GA X, NC X, GSMNP X, TN X, VA X, SW VA X, C VA X, SNP X, N VA X, WV X, MD X, PA X, NJ X, NY X, CT X, MA X, VT X, NH X, ME X</Message><Message>To get a list of all AT closures in a region, include that region\'s name in your text (eg, `closures pct oregon`)</Message></Response>'
+      );
+    });
+
+    test("region closures invocation", async () => {
+      const messageXml = await getResponseBody("closures at north carolina");
+      const messages = getMessages(messageXml);
+
+      expect(messages.length).toBeGreaterThan(1);
+      messages.slice(0, messages.length - 1).forEach((m) => {
+        expect(m).toMatch(/\(\d+\) .+/);
+      });
+    });
+
+    test("specific closure invocation", async () => {
+      const messageXml = await getResponseBody("closures at north carolina 1");
+
+      expect(messageXml).toMatch(
+        /<\?xml version="1.0" encoding="UTF-8"\?><Response><Message>.+<\/Message><\/Response>/
+      );
+    });
+  });
 });
 
 test("weather invocation", async () => {
