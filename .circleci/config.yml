@@ -11,11 +11,11 @@ jobs:
             - node-v1-{{ .Branch }}-{{ checksum "package-lock.json" }}
             - node-v1-{{ .Branch }}-
             - node-v1-
+      - run: "npm install"
       - save_cache:
           key: node-v1-{{ .Branch }}-{{ checksum "package-lock.json" }}
           paths:
-            - ~/usr/local/lib/node_modules
-      - run: "npm install"
+            - node_modules
       - persist_to_workspace:
           root: .
           paths:
