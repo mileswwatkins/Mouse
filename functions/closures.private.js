@@ -9,23 +9,36 @@ const {
 } = typeof Runtime === "undefined"
   ? require("./closures-pct.private.js")
   : require(Runtime.getFunctions()["closures-pct"].path);
+const {
+  makeAllClosuresMessage: makeAtAllClosuresMessage,
+  getRegionClosuresData: getAtRegionClosuresData,
+  getSpecificClosureInfo: getAtSpecificClosureInfo,
+} = typeof Runtime === "undefined"
+  ? require("./closures-at.private.js")
+  : require(Runtime.getFunctions()["closures-at"].path);
 
 const availableTrailsAndRegions = {
   at: [
-    "maine",
-    "new hampshire",
-    "vermont",
-    "massachusetts",
-    "connecticut",
-    "new york",
-    "new jersey",
-    "pennsylvania",
-    "maryland",
-    "west virginia",
-    "virginia",
-    "tennessee",
-    "north carolina",
+    "trailwide",
     "georgia",
+    "north carolina",
+    "great smoky mountains national park",
+    "tennessee",
+    "virginia",
+    "southwest virginia",
+    "central virginia",
+    "shenandoah national park",
+    "northern virginia",
+    "west virginia",
+    "maryland",
+    "pennsylvania",
+    "new jersey",
+    "new york",
+    "connecticut",
+    "massachusetts",
+    "vermont",
+    "new hampshire",
+    "maine",
   ],
   pct: [
     "southern california",
@@ -127,11 +140,14 @@ const handleInvocation = async (invocation, callback) => {
 const handleAllClosuresInvocation = async (trail, callback) => {
   const twiml = new Twilio.twiml.MessagingResponse();
 
-  const message = trail === "pct" ? await makePctAllClosuresMessage() : "";
+  const message =
+    trail === "pct"
+      ? await makePctAllClosuresMessage()
+      : await makeAtAllClosuresMessage();
 
   twiml.message(message);
   twiml.message(
-    `To get a list of all ${trail.toUpperCase()} closures in a region, include that region's name in your text (eg, text \`closures pct oregon\`)`
+    `To get a list of all ${trail.toUpperCase()} closures in a region, include that region's name in your text (eg, \`closures pct oregon\`)`
   );
 
   return callback(null, twiml);
@@ -141,7 +157,9 @@ const handleRegionClosuresInvocation = async (trail, region, callback) => {
   const twiml = new Twilio.twiml.MessagingResponse();
 
   const { titles, dates, types } =
-    trail === "pct" ? await getPctRegionClosuresData(region) : {};
+    trail === "pct"
+      ? await getPctRegionClosuresData(region)
+      : await getAtRegionClosuresData(region);
 
   if (titles.length === 0) {
     twiml.message("No closures found for this region");
@@ -152,7 +170,7 @@ const handleRegionClosuresInvocation = async (trail, region, callback) => {
     twiml.message(m);
   });
   twiml.message(
-    "To get more information for a closure, text the region and that closure's number (eg, `closures central california 3`)"
+    "To get more information for a closure, text the region and that closure's number (eg, `closures pct washington 3`)"
   );
 
   return callback(null, twiml);
@@ -169,14 +187,14 @@ const handleSpecificClosureInvocation = async (
   const info =
     trail === "pct"
       ? await getPctSpecificClosureInfo(region, closureNumber)
-      : "";
+      : await getAtSpecificClosureInfo(region, closureNumber);
 
   if (info instanceof Error) {
     twiml.message(info.message);
     return callback(null, twiml);
   }
 
-  twiml.message(buildSpecificClosureMessage(paragraphs));
+  twiml.message(buildSpecificClosureMessage(info));
 
   return callback(null, twiml);
 };
@@ -189,7 +207,17 @@ const buildRegionClosuresMessages = (titles, dates, types) => {
     const date = typeof dates[index] === "string" ? dates[index] : "";
     const type = types[index];
 
-    let message = `(${index + 1})${date ? ` ${date}` : ""} ${type}: ${title}`;
+    let message = `(${index + 1}) `;
+    if (!date && !type) {
+      message += `${title}`;
+    } else if (date && !type) {
+      message += `${date}: ${title}`;
+    } else if (!date && type) {
+      message += `${type}: ${title}`;
+    } else {
+      message += `${date} ${type}: ${title}`;
+    }
+
     if (message.length > maxLengthIfGsm7Encoding) {
       message = message.slice(0, maxLengthIfGsm7Encoding - 4) + "...";
     }
@@ -198,16 +226,16 @@ const buildRegionClosuresMessages = (titles, dates, types) => {
   return messages;
 };
 
-const buildSpecificClosureMessage = (paragraphs) => {
+const buildSpecificClosureMessage = (info) => {
   // Build a message for all body text through the first _substantive_
   // paragraph (eg, don't stop at a first paragraph that's just
   // "Updated 9/23 10:00 AM")
   let message = "";
-  paragraphs.forEach((text, index) => {
+  info.split("\n").forEach((paragraph, index) => {
     if (index === 0) {
-      message += text;
+      message += paragraph;
     } else if (message.length < maxLengthIfGsm7Encoding) {
-      message = [message, text].join(" ");
+      message = [message, paragraph].join(" ");
     } else {
       return;
     }

@@ -40,11 +40,11 @@ Thu: Widespread haze between noon and 3pm. Sunny, high of 48. SSW wind 5-10 mph 
 
 _"Closure" here includes any safety notices, detours, updates, or hazards posted by the trail authority. Currently only supports [the Pacific Crest Trail](https://www.pcta.org)._
 
-#### Number of closures in each region
+#### Number of closures in each region of a trail
 
 ##### Your message
 
-```closures```
+```closures pct```
 
 ##### Mouse's response
 
@@ -52,11 +52,11 @@ _"Closure" here includes any safety notices, detours, updates, or hazards posted
 Closures by region: Southern California 5, Central California 0, Northern California 5, Oregon 1, Washington 3
 ```
 
-#### List of closures in a specific region
+#### List of closures in a specific region of a trail
 
 ##### Your message
 
-```closures northern california```
+```closures pct northern california```
 
 ##### Mouse's response
 
@@ -78,7 +78,7 @@ _The number refers to which closure item in the list you would like to access. O
 
 ##### Your message
 
-```closures northern california 3```
+```closures pct northern california 3```
 
 ##### Mouse's response
 
@@ -133,7 +133,7 @@ Then, you should be able to make HTTP POST requests to `http://localhost:3000/mo
 ```sh
 curl http://localhost:3000/mouse \
     --request POST \
-    --data '{"Body":"closures"}' \
+    --data '{"Body":"closures pct"}' \
     --header "Content-Type: application/json"
 
 <?xml version="1.0" encoding="UTF-8"?><Response><Message>Closures by region: Southern California 5, Central California 0, Northern California 5, Oregon 1, Washington 3</Message><Message>To get a list of all closures in a region, include that region's name in your text (eg, text `closures central california`)</Message></Response>%

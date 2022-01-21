@@ -110,8 +110,11 @@ const getInReachSlug = (message) => {
 const convertUrlToGoogleCacheUrl = (url) =>
   `http://webcache.googleusercontent.com/search?q=cache:${url}&strip=1&vwsrc=0`;
 
+const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+
 module.exports = {
   convertUrlToGoogleCacheUrl,
   getInReachSlug,
   maxLengthIfGsm7Encoding,
+  sleep,
 };
