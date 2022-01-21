@@ -37,8 +37,18 @@ jobs:
           at: .
       - run: "npm run test-e2e"
 
+  # Not currently used, and would require Twilio secrets
+  # to be injected into the environment
+  deploy:
+    docker:
+      - image: cimg/node:12.22
+    steps:
+      - attach_workspace:
+          at: .
+      - run: "twilio serverless:deploy"
+
 workflows:
-  test-workflow:
+  testing-workflow:
     jobs:
       - npm-install
       - run-unit-tests:
