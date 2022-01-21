@@ -126,6 +126,8 @@ And if you want to deploy instead of just running/testing locally, then also:
 - `npm run test-watch` runs a daemon that runs tests for all files that have changed since your last Git commit
 - `npm run test-e2e` runs the end-to-end tests, that make actual HTTP requests
 
+This project also uses Husky to propagate pre-commit Git hooks. Any new commit will trigger the unit tests, and commits on the `main` branch will trigger the end-to-end tests as well.
+
 ### Running locally
 
 ```sh
