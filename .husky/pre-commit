@@ -2,4 +2,10 @@
 . "$(dirname "$0")/_/husky.sh"
 
 npx pretty-quick --staged
-npm test
+npm run test
+
+# Be extra thorough when committing directly to the main branch
+branch="$(git rev-parse --abbrev-ref HEAD)"
+if [ "$branch" = "main" ]; then
+  npm run test-e2e
+fi

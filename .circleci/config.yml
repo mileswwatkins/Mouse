@@ -1,0 +1,59 @@
+version: 2.1
+
+jobs:
+  npm-install:
+    docker:
+      - image: cimg/node:12.22
+    steps:
+      - checkout
+      - restore_cache:
+          keys:
+            - node-v1-{{ .Branch }}-{{ checksum "package-lock.json" }}
+            - node-v1-{{ .Branch }}-
+            - node-v1-
+      - run: "npm install"
+      - save_cache:
+          key: node-v1-{{ .Branch }}-{{ checksum "package-lock.json" }}
+          paths:
+            - node_modules
+      - persist_to_workspace:
+          root: .
+          paths:
+            - .
+
+  run-unit-tests:
+    docker:
+      - image: cimg/node:12.22
+    steps:
+      - attach_workspace:
+          at: .
+      - run: "npm run test"
+
+  run-e2e-tests:
+    docker:
+      - image: cimg/node:12.22
+    steps:
+      - attach_workspace:
+          at: .
+      - run: "npm run test-e2e"
+
+  # Not currently used, and would require Twilio secrets
+  # to be injected into the environment
+  deploy:
+    docker:
+      - image: cimg/node:12.22
+    steps:
+      - attach_workspace:
+          at: .
+      - run: "twilio serverless:deploy"
+
+workflows:
+  testing-workflow:
+    jobs:
+      - npm-install
+      - run-unit-tests:
+          requires:
+            - npm-install
+      - run-e2e-tests:
+          requires:
+            - npm-install
