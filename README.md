@@ -6,6 +6,10 @@ A chatbot to provide information to backcountry hikers via satellite SMS, such a
     <img src="https://github.com/mileswwatkins/Mouse/blob/main/README-weather-screenshot.png?raw=true" style="height: 400px;" />
 </p>
 
+## A note about safety
+
+The backcountry can be dangerous, and Mouse is _not_ a safety tool. You shouldn't depend on Mouse's information when making decisions, especially regarding hazardous weather or wildfires.
+
 ## How do I get access to Mouse?
 
 Mouse is currently in beta, so you'll need to ask the developer (Miles Watkins) for Mouse's phone number. Once you have that phone number, you can text it from your Garmin InReach or other SMS-capable device.
