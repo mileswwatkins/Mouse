@@ -117,28 +117,96 @@ const trailsInfo = [
     name: "Appalachian Trail",
     abbreviation: "at",
     regions: [
-      { name: "Georgia", synonyms: ["ga"] },
-      { name: "North Carolina", synonyms: ["nc"] },
+      {
+        name: "A.T. Trailwide Updates",
+        abbreviation: "trailwide",
+        synonyms: ["trailwide"],
+        slug: "trailwide",
+      },
+      { name: "Georgia", abbreviation: "GA", synonyms: ["ga"], slug: "ga" },
+      {
+        name: "North Carolina",
+        abbreviation: "NC",
+        synonyms: ["nc"],
+        slug: "nc",
+      },
       {
         name: "Great Smoky Mountains National Park",
+        abbreviation: "GSMNP",
         synonyms: ["gsmnp", "gsm", "smokies", "smoky mountains"],
+        slug: "gsmnp",
       },
-      { name: "Tennessee", synonyms: ["tn", "tenn"] },
-      { name: "Virginia", synonyms: ["va"] },
-      { name: "Southwest Virginia", synonyms: ["sw va", "swva"] },
-      { name: "Central Virginia", synonyms: ["c va", "cva"] },
-      { name: "Shenandoah National Park", synonyms: ["shenandoah", "snp"] },
-      { name: "Northern Virginia", synonyms: ["n va", "nva", "nova"] },
-      { name: "West Virginia", synonyms: ["wv", "wva", "w va"] },
-      { name: "Maryland", synonyms: ["md"] },
-      { name: "Pennsylvania", synonyms: ["pa", "penn"] },
-      { name: "New Jersey", synonyms: ["nj", "jersey"] },
-      { name: "New York", synonyms: ["ny"] },
-      { name: "Connecticut", synonyms: ["ct", "conn"] },
-      { name: "Massachusetts", synonyms: ["ma", "mass"] },
-      { name: "Vermont", synonyms: ["vt"] },
-      { name: "New Hampshire", synonyms: ["nh"] },
-      { name: "Maine", synonyms: ["me"] },
+      {
+        name: "Tennessee",
+        abbreviation: "TN",
+        synonyms: ["tn", "tenn"],
+        slug: "tn",
+      },
+      { name: "Virginia", abbreviation: "VA", synonyms: ["va"], slug: "va" },
+      {
+        name: "Southwest Virginia",
+        abbreviation: "SW VA",
+        synonyms: ["sw va", "swva"],
+        slug: "southwest-virginia",
+      },
+      {
+        name: "Central Virginia",
+        abbreviation: "C VA",
+        synonyms: ["c va", "cva"],
+        slug: "central-virginia",
+      },
+      {
+        name: "Shenandoah National Park",
+        abbreviation: "SNP",
+        synonyms: ["shenandoah", "snp"],
+        slug: "shenandoah-national-park",
+      },
+      {
+        name: "Northern Virginia",
+        abbreviation: "N VA",
+        synonyms: ["n va", "nva", "nova"],
+        slug: "northern-virginia",
+      },
+      {
+        name: "West Virginia",
+        abbreviation: "WV",
+        synonyms: ["wv", "wva", "w va"],
+        slug: "wv",
+      },
+      { name: "Maryland", abbreviation: "MD", synonyms: ["md"], slug: "md" },
+      {
+        name: "Pennsylvania",
+        abbreviation: "PA",
+        synonyms: ["pa", "penn"],
+        slug: "pa",
+      },
+      {
+        name: "New Jersey",
+        abbreviation: "NJ",
+        synonyms: ["nj", "jersey"],
+        slug: "nj",
+      },
+      { name: "New York", abbreviation: "NY", synonyms: ["ny"], slug: "ny" },
+      {
+        name: "Connecticut",
+        abbreviation: "CT",
+        synonyms: ["ct", "conn"],
+        slug: "ct",
+      },
+      {
+        name: "Massachusetts",
+        abbreviation: "MA",
+        synonyms: ["ma", "mass"],
+        slug: "ma",
+      },
+      { name: "Vermont", abbreviation: "VT", synonyms: ["vt"], slug: "vt" },
+      {
+        name: "New Hampshire",
+        abbreviation: "NH",
+        synonyms: ["nh"],
+        slug: "nh",
+      },
+      { name: "Maine", abbreviation: "ME", synonyms: ["me"], slug: "me" },
     ],
   },
   {
@@ -179,10 +247,16 @@ trailsInfo.forEach((t) => {
   });
 });
 
+// Convenience subsets of the larger data
+const atRegions = trailsInfo.find((t) => t.abbreviation === "at").regions;
+const pctRegions = trailsInfo.find((t) => t.abbreviation === "pct").regions;
+
 module.exports = {
   convertUrlToGoogleCacheUrl,
   getInReachSlug,
   maxLengthIfGsm7Encoding,
   sleep,
   trailsInfo,
+  atRegions,
+  pctRegions,
 };

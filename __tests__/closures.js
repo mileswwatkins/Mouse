@@ -37,6 +37,11 @@ describe("parse closure invocation", () => {
       region: "Northern Virginia",
       closureNumber: undefined,
     });
+    expect(parseClosureInvocation("closures at trailwide")).toEqual({
+      trail: "at",
+      region: "A.T. Trailwide Updates",
+      closureNumber: undefined,
+    });
   });
   test("parse specific closure", () => {
     expect(parseClosureInvocation("closures pct washington 10")).toEqual({
