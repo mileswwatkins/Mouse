@@ -42,9 +42,7 @@ describe("closure invocations", () => {
     });
 
     test("region closures invocation", async () => {
-      const messageXml = await getResponseBody(
-        "closures pct southern california"
-      );
+      const messageXml = await getResponseBody("closures pct socal");
       const messages = getMessages(messageXml);
 
       expect(messages.length).toBeGreaterThan(1);

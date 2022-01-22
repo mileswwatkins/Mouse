@@ -112,9 +112,77 @@ const convertUrlToGoogleCacheUrl = (url) =>
 
 const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
+const trailsInfo = [
+  {
+    name: "Appalachian Trail",
+    abbreviation: "at",
+    regions: [
+      { name: "Georgia", synonyms: ["ga"] },
+      { name: "North Carolina", synonyms: ["nc"] },
+      {
+        name: "Great Smoky Mountains National Park",
+        synonyms: ["gsmnp", "gsm", "smokies", "smoky mountains"],
+      },
+      { name: "Tennessee", synonyms: ["tn", "tenn"] },
+      { name: "Virginia", synonyms: ["va"] },
+      { name: "Southwest Virginia", synonyms: ["sw va", "swva"] },
+      { name: "Central Virginia", synonyms: ["c va", "cva"] },
+      { name: "Shenandoah National Park", synonyms: ["shenandoah", "snp"] },
+      { name: "Northern Virginia", synonyms: ["n va", "nva", "nova"] },
+      { name: "West Virginia", synonyms: ["wv", "wva", "w va"] },
+      { name: "Maryland", synonyms: ["md"] },
+      { name: "Pennsylvania", synonyms: ["pa", "penn"] },
+      { name: "New Jersey", synonyms: ["nj", "jersey"] },
+      { name: "New York", synonyms: ["ny"] },
+      { name: "Connecticut", synonyms: ["ct", "conn"] },
+      { name: "Massachusetts", synonyms: ["ma", "mass"] },
+      { name: "Vermont", synonyms: ["vt"] },
+      { name: "New Hampshire", synonyms: ["nh"] },
+      { name: "Maine", synonyms: ["me"] },
+    ],
+  },
+  {
+    name: "Pacific Crest Trail",
+    abbreviation: "pct",
+    regions: [
+      {
+        name: "Southern California",
+        synonyms: ["socal", "so cal"],
+        slug: "southern-california",
+      },
+      {
+        name: "Central California",
+        synonyms: [],
+        slug: "central-california",
+      },
+      {
+        name: "Northern California",
+        synonyms: ["norcal", "nor cal"],
+        slug: "northern-california",
+      },
+      {
+        name: "Oregon",
+        synonyms: ["or", "ore"],
+        slug: "oregon",
+      },
+      {
+        name: "Washington",
+        synonyms: ["wa", "wash"],
+        slug: "washington",
+      },
+    ],
+  },
+];
+trailsInfo.forEach((t) => {
+  t.regions.forEach((r) => {
+    r.synonyms.push(r.name.toLowerCase());
+  });
+});
+
 module.exports = {
   convertUrlToGoogleCacheUrl,
   getInReachSlug,
   maxLengthIfGsm7Encoding,
   sleep,
+  trailsInfo,
 };
