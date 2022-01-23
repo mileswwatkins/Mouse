@@ -112,13 +112,11 @@ This project runs on the serverless architecture of Twilio Functions.
 
 - Node 12
 - `npm install`
-- `npm install twilio-cli --global`
-- `twilio plugins:install @twilio-labs/plugin-serverless`
 
 And if you want to deploy instead of just running/testing locally, then also:
 
 - A Twilio account and active phone number
-- `twilio login`
+- Populating a `.env` file or your shell environment with your Twilio `ACCOUNT_SID` and `AUTH_TOKEN`
 
 ### Tests
 
@@ -147,6 +145,6 @@ curl http://localhost:3000/mouse \
 
 ### Deploying
 
-- `twilio serverless:deploy`, which will (assuming success) print `Deployment Details`, which includes Mouse's Twilio Function's URL (eg `https://mouse-1234-dev.twil.io/mouse`)
+- `npm run deploy`, which will (assuming success) print `Deployment Details`, which includes Mouse's Twilio Function's URL (eg `https://mouse-1234-dev.twil.io/mouse`)
 - In the Twilio web console, navigate to your phone number, scroll down to the `Messaging` section, and in the `A MESSAGE COMES IN` section set your Webhook field to Mouse's URL
-  - You'll only need to edit this field once; all future `twilio serverless:deploy` commands will deploy Mouse to the same URL (since the service ID is saved in a gitignore'd `.twiliodeployinfo` file)
+  - You'll only need to edit this field once; all future `npm run deploy` commands will deploy Mouse to the same URL (since the service ID is saved in a gitignore'd `.twiliodeployinfo` file)
