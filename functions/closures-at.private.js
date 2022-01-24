@@ -1,55 +1,15 @@
 const axios = require("axios").default;
 const cheerio = require("cheerio");
-const { sleep } =
+const { sleep, atRegions } =
   typeof Runtime === "undefined"
     ? require("./utils.private.js")
     : require(Runtime.getFunctions()["utils"].path);
 
-const regionsAndAbbreviations = {
-  "a.t. trailwide updates": "trailwide",
-  georgia: "GA",
-  "north carolina": "NC",
-  "great smoky mountains national park": "GSMNP",
-  tennessee: "TN",
-  virginia: "VA",
-  "southwest virginia": "SW VA",
-  "central virginia": "C VA",
-  "shenandoah national park": "SNP",
-  "northern virginia": "N VA",
-  "west virginia": "WV",
-  maryland: "MD",
-  pennsylvania: "PA",
-  "new jersey": "NJ",
-  "new york": "NY",
-  connecticut: "CT",
-  massachusetts: "MA",
-  vermont: "VT",
-  "new hampshire": "NH",
-  maine: "ME",
-};
-
-const getUrlSlug = (region) => {
-  if (region === "great smoky mountains national park") {
-    return "gsmnp";
-  } else if (region === "trailwide") {
-    return "trailwide";
-  } else if (region !== "west virginia" && region.includes(" virginia")) {
-    return region.replace(/ /g, "-");
-  } else if (region === "shenandoah national park") {
-    return region.replace(/ /g, "-");
-  } else {
-    return regionsAndAbbreviations[region].toLowerCase();
-  }
-};
-
 const makeAllClosuresMessage = async () => {
-  const closuresCounter = Object.keys(regionsAndAbbreviations).reduce(
-    (acc, region) => {
-      acc[region] = 0;
-      return acc;
-    },
-    {}
-  );
+  const closuresCounter = atRegions.reduce((acc, r) => {
+    acc[r.name] = 0;
+    return acc;
+  }, []);
 
   // Need to deal with pagination of the listings; this functionality
   // will also be fine if there's just one page
@@ -70,34 +30,20 @@ const makeAllClosuresMessage = async () => {
         return;
       }
 
-      if (!Object.keys(closuresCounter).includes(r)) {
-        // Sometimes the state abbreviation is used here instead
-        // of the state name
-        let potentialMatch = false;
-        Object.entries(regionsAndAbbreviations).forEach(([key, value]) => {
-          if (r.toLowerCase() === value.toLowerCase()) {
-            r = key;
-            potentialMatch = true;
-          }
-        });
+      const regionMatch = atRegions.find(
+        (regionMetadata) =>
+          r === regionMetadata.name.toLowerCase() ||
+          r.replace(/ /g, "-") === regionMetadata.slug
+      );
 
-        // More special cases may come up in the future;
-        // watch the debug log
-        if (r === "central-virginia") {
-          r = "central virginia";
-          potentialMatch = true;
-        } else if (r === "southwest-virginia") {
-          r = "southwest virginia";
-          potentialMatch = true;
-        }
-
-        if (!potentialMatch) {
-          console.debug(`Found unexpected region name: ${r}`);
-          r = "a.t. trailwide updates";
-        }
+      let key;
+      if (regionMatch) {
+        key = regionMatch.name;
+      } else {
+        console.debug(`Found unexpected region name: ${r}`);
+        key = "A.T. Trailwide Updates";
       }
-
-      closuresCounter[r] += 1;
+      closuresCounter[key] += 1;
     });
 
     const nextPageNumber = $("a.next.page-numbers")
@@ -113,12 +59,15 @@ const makeAllClosuresMessage = async () => {
   }
 
   return `Closures by region: ${Object.entries(closuresCounter)
-    .map(([key, value]) => `${regionsAndAbbreviations[key]} ${value}`)
+    .map(
+      ([key, value]) =>
+        `${atRegions.find((r) => r.name === key).abbreviation} ${value}`
+    )
     .join(", ")}`;
 };
 
 const getRegionClosuresData = async (region) => {
-  const regionSlug = getUrlSlug(region.toLowerCase());
+  const regionSlug = atRegions.find((r) => r.name === region).slug;
 
   const titles = [];
   const types = [];
@@ -171,7 +120,7 @@ const getRegionClosuresData = async (region) => {
 };
 
 const getSpecificClosureInfo = async (region, closureNumber) => {
-  const regionSlug = getUrlSlug(region.toLowerCase());
+  const regionSlug = atRegions.find((r) => r.name === region).slug;
 
   const urls = [];
 

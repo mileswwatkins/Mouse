@@ -132,10 +132,152 @@ const getLatLngFromInReach = async (inReachSlug) => {
   return { latitude, longitude };
 };
 
+const trailsInfo = [
+  {
+    name: "Appalachian Trail",
+    abbreviation: "at",
+    regions: [
+      {
+        name: "A.T. Trailwide Updates",
+        abbreviation: "trailwide",
+        synonyms: ["trailwide"],
+        slug: "trailwide",
+      },
+      { name: "Georgia", abbreviation: "GA", synonyms: ["ga"], slug: "ga" },
+      {
+        name: "North Carolina",
+        abbreviation: "NC",
+        synonyms: ["nc"],
+        slug: "nc",
+      },
+      {
+        name: "Great Smoky Mountains National Park",
+        abbreviation: "GSMNP",
+        synonyms: ["gsmnp", "gsm", "smokies", "smoky mountains"],
+        slug: "gsmnp",
+      },
+      {
+        name: "Tennessee",
+        abbreviation: "TN",
+        synonyms: ["tn", "tenn"],
+        slug: "tn",
+      },
+      { name: "Virginia", abbreviation: "VA", synonyms: ["va"], slug: "va" },
+      {
+        name: "Southwest Virginia",
+        abbreviation: "SW VA",
+        synonyms: ["sw va", "swva"],
+        slug: "southwest-virginia",
+      },
+      {
+        name: "Central Virginia",
+        abbreviation: "C VA",
+        synonyms: ["c va", "cva"],
+        slug: "central-virginia",
+      },
+      {
+        name: "Shenandoah National Park",
+        abbreviation: "SNP",
+        synonyms: ["shenandoah", "snp"],
+        slug: "shenandoah-national-park",
+      },
+      {
+        name: "Northern Virginia",
+        abbreviation: "N VA",
+        synonyms: ["n va", "nva", "nova"],
+        slug: "northern-virginia",
+      },
+      {
+        name: "West Virginia",
+        abbreviation: "WV",
+        synonyms: ["wv", "wva", "w va"],
+        slug: "wv",
+      },
+      { name: "Maryland", abbreviation: "MD", synonyms: ["md"], slug: "md" },
+      {
+        name: "Pennsylvania",
+        abbreviation: "PA",
+        synonyms: ["pa", "penn"],
+        slug: "pa",
+      },
+      {
+        name: "New Jersey",
+        abbreviation: "NJ",
+        synonyms: ["nj", "jersey"],
+        slug: "nj",
+      },
+      { name: "New York", abbreviation: "NY", synonyms: ["ny"], slug: "ny" },
+      {
+        name: "Connecticut",
+        abbreviation: "CT",
+        synonyms: ["ct", "conn"],
+        slug: "ct",
+      },
+      {
+        name: "Massachusetts",
+        abbreviation: "MA",
+        synonyms: ["ma", "mass"],
+        slug: "ma",
+      },
+      { name: "Vermont", abbreviation: "VT", synonyms: ["vt"], slug: "vt" },
+      {
+        name: "New Hampshire",
+        abbreviation: "NH",
+        synonyms: ["nh"],
+        slug: "nh",
+      },
+      { name: "Maine", abbreviation: "ME", synonyms: ["me"], slug: "me" },
+    ],
+  },
+  {
+    name: "Pacific Crest Trail",
+    abbreviation: "pct",
+    regions: [
+      {
+        name: "Southern California",
+        synonyms: ["socal", "so cal"],
+        slug: "southern-california",
+      },
+      {
+        name: "Central California",
+        synonyms: [],
+        slug: "central-california",
+      },
+      {
+        name: "Northern California",
+        synonyms: ["norcal", "nor cal"],
+        slug: "northern-california",
+      },
+      {
+        name: "Oregon",
+        synonyms: ["or", "ore"],
+        slug: "oregon",
+      },
+      {
+        name: "Washington",
+        synonyms: ["wa", "wash"],
+        slug: "washington",
+      },
+    ],
+  },
+];
+trailsInfo.forEach((t) => {
+  t.regions.forEach((r) => {
+    r.synonyms.push(r.name.toLowerCase());
+  });
+});
+
+// Convenience subsets of the larger data
+const atRegions = trailsInfo.find((t) => t.abbreviation === "at").regions;
+const pctRegions = trailsInfo.find((t) => t.abbreviation === "pct").regions;
+
 module.exports = {
   convertUrlToGoogleCacheUrl,
   getInReachSlug,
   maxLengthIfGsm7Encoding,
   sleep,
   getLatLngFromInReach,
+  trailsInfo,
+  atRegions,
+  pctRegions,
 };
