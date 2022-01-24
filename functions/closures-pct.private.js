@@ -2,6 +2,7 @@ const axios = require("axios").default;
 const cheerio = require("cheerio");
 const dateFns = require("date-fns");
 const {
+  pctRegions,
   // For temporary use, while Cloudflare is blocking bot requests
   // on the actual PCTA website
   convertUrlToGoogleCacheUrl,
@@ -9,14 +10,6 @@ const {
   typeof Runtime === "undefined"
     ? require("./utils.private.js")
     : require(Runtime.getFunctions()["utils"].path);
-
-const pctaRegionUrlSlugs = {
-  "southern california": "southern-california",
-  "central california": "central-california",
-  "northern california": "northern-california",
-  oregon: "oregon",
-  washington: "washington",
-};
 
 const makeAllClosuresMessage = async () => {
   const closuresResponse = await axios.get(
@@ -33,16 +26,9 @@ const makeAllClosuresMessage = async () => {
     .get()
     .map((el) => $(el).text());
 
-  const southernCaliforniaClosures =
-    closureCounts[regionNames.indexOf("Southern California")];
-  const centralCaliforniaClosures =
-    closureCounts[regionNames.indexOf("Central California")];
-  const northernCaliforniaClosures =
-    closureCounts[regionNames.indexOf("Northern California")];
-  const oregonClosures = closureCounts[regionNames.indexOf("Oregon")];
-  const washingtonClosures = closureCounts[regionNames.indexOf("Washington")];
-
-  return `Closures by region: Southern California ${southernCaliforniaClosures}, Central California ${centralCaliforniaClosures}, Northern California ${northernCaliforniaClosures}, Oregon ${oregonClosures}, Washington ${washingtonClosures}`;
+  return `Closures by region: ${pctRegions
+    .map((r) => `${r.name} ${closureCounts[regionNames.indexOf(r.name)]}`)
+    .join(", ")}`;
 };
 
 const parsePctaClosureClass = (glyphClassName) =>
@@ -55,7 +41,7 @@ const parsePctaClosureClass = (glyphClassName) =>
     : "";
 
 const getRegionClosuresData = async (region) => {
-  const regionSlug = pctaRegionUrlSlugs[region.toLowerCase()];
+  const regionSlug = pctRegions.find((r) => r.name === region).slug;
 
   const closuresResponse = await axios.get(
     convertUrlToGoogleCacheUrl(
@@ -80,7 +66,7 @@ const getRegionClosuresData = async (region) => {
 };
 
 const getSpecificClosureInfo = async (region, closureNumber) => {
-  const regionSlug = pctaRegionUrlSlugs[region.toLowerCase()];
+  const regionSlug = pctRegions.find((r) => r.name === region).slug;
 
   const regionResponse = await axios.get(
     convertUrlToGoogleCacheUrl(

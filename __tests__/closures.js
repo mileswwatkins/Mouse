@@ -22,14 +22,31 @@ describe("parse closure invocation", () => {
   test("parse closures for region of trail", () => {
     expect(parseClosureInvocation("closures pct southern california")).toEqual({
       trail: "pct",
-      region: "southern california",
+      region: "Southern California",
+      closureNumber: undefined,
+    });
+  });
+  test("parse closures for region synonyms", () => {
+    expect(parseClosureInvocation("closures pct socal")).toEqual({
+      trail: "pct",
+      region: "Southern California",
+      closureNumber: undefined,
+    });
+    expect(parseClosureInvocation("closures at nova")).toEqual({
+      trail: "at",
+      region: "Northern Virginia",
+      closureNumber: undefined,
+    });
+    expect(parseClosureInvocation("closures at trailwide")).toEqual({
+      trail: "at",
+      region: "A.T. Trailwide Updates",
       closureNumber: undefined,
     });
   });
   test("parse specific closure", () => {
     expect(parseClosureInvocation("closures pct washington 10")).toEqual({
       trail: "pct",
-      region: "washington",
+      region: "Washington",
       closureNumber: 10,
     });
   });

@@ -1,4 +1,4 @@
-const { maxLengthIfGsm7Encoding } =
+const { maxLengthIfGsm7Encoding, trailsInfo } =
   typeof Runtime === "undefined"
     ? require("./utils.private.js")
     : require(Runtime.getFunctions()["utils"].path);
@@ -17,51 +17,16 @@ const {
   ? require("./closures-at.private.js")
   : require(Runtime.getFunctions()["closures-at"].path);
 
-const availableTrailsAndRegions = {
-  at: [
-    "trailwide",
-    "georgia",
-    "north carolina",
-    "great smoky mountains national park",
-    "tennessee",
-    "virginia",
-    "southwest virginia",
-    "central virginia",
-    "shenandoah national park",
-    "northern virginia",
-    "west virginia",
-    "maryland",
-    "pennsylvania",
-    "new jersey",
-    "new york",
-    "connecticut",
-    "massachusetts",
-    "vermont",
-    "new hampshire",
-    "maine",
-  ],
-  pct: [
-    "southern california",
-    "central california",
-    "northern california",
-    "oregon",
-    "washington",
-  ],
-};
-
 const parseClosureInvocation = (invocation) => {
-  const availableTrails = Object.keys(availableTrailsAndRegions);
-  const availableRegions = Object.values(availableTrailsAndRegions).reduce(
-    (acc, one) => {
-      return acc.concat(one);
-    },
-    []
-  );
+  const availableTrails = trailsInfo.map((t) => t.abbreviation);
+  const availableRegionSynonyms = trailsInfo
+    .map((t) => t.regions.map((r) => r.synonyms).flat())
+    .flat();
 
   const match = invocation.match(
     new RegExp(
       // prettier-ignore
-      `^closures ?(${availableTrails.join("|")})? ?(${availableRegions.join("|")})? ?(\\d+)?$`,
+      `^closures ?(${availableTrails.join("|")})? ?(${availableRegionSynonyms.join("|").replace('.', '\\.')})? ?(\\d+)?$`,
       "i"
     )
   );
@@ -69,10 +34,21 @@ const parseClosureInvocation = (invocation) => {
   if (!(match instanceof Array)) {
     return {};
   }
-  let [_invocation, trail, region, closureNumber] = match;
+  let [_invocation, trail, region, closureNumber] = match.map((i) =>
+    typeof i === "undefined" ? i : i.trim().toLowerCase()
+  );
 
   if (typeof closureNumber !== "undefined") {
     closureNumber = parseInt(closureNumber);
+  }
+
+  // Standardize the region to its expected/full name;
+  // eg, `socal` -> `Southern California` or
+  // `northern virginia` -> `Northern Virginia`
+  if (trail && region) {
+    region = trailsInfo
+      .find((t) => t.abbreviation === trail)
+      .regions.find((r) => r.synonyms.includes(region)).name;
   }
 
   return { trail, region, closureNumber };
@@ -85,7 +61,7 @@ const handleInvocation = async (invocation, callback) => {
 
   if (
     typeof trail !== "undefined" &&
-    !Object.keys(availableTrailsAndRegions).includes(trail)
+    !trailsInfo.map((t) => t.abbreviation).includes(trail)
   ) {
     twiml.message(`Error: Unknown trail provided: \`${trail}\``);
     return callback(null, twiml);
@@ -94,10 +70,14 @@ const handleInvocation = async (invocation, callback) => {
   if (
     typeof trail !== "undefined" &&
     typeof region !== "undefined" &&
-    !availableTrailsAndRegions[trail].includes(region)
+    !trailsInfo
+      .find((t) => t.abbreviation === trail)
+      .regions.find((r) => r.name === region)
   ) {
     twiml.message(
-      `Error: \`${region}\` is not a valid region for the ${trail.toUpperCase()}`
+      `Error: \`${region}\` is not a valid region for the ${
+        trailsInfo.find((t) => t.abbreviation === trail).name
+      }`
     );
     return callback(null, twiml);
   }
