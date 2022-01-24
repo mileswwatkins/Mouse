@@ -12,6 +12,9 @@ const handler = async function (context, event, callback) {
   const {
     handleInvocation: handleWikipediaInvocation,
   } = require(Runtime.getFunctions()["wikipedia"].path);
+  const {
+    handleInvocation: handleMileageInvocation,
+  } = require(Runtime.getFunctions()["mileage"].path);
 
   const twiml = new Twilio.twiml.MessagingResponse();
 
@@ -25,12 +28,14 @@ const handler = async function (context, event, callback) {
 
   const invocation = getInvocationFromMessage(message);
 
-  if (invocation.includes("weather")) {
+  if (invocation.startsWith("weather")) {
     return await handleWeatherInvocation(invocation, callback);
-  } else if (invocation.includes("closures")) {
+  } else if (invocation.startsWith("closures")) {
     return await handleClosuresInvocation(invocation, callback);
-  } else if (invocation.includes("wikipedia")) {
+  } else if (invocation.startsWith("wikipedia")) {
     return await handleWikipediaInvocation(invocation, callback);
+  } else if (invocation.startsWith("mileage")) {
+    return await handleMileageInvocation(invocation, callback);
   } else {
     twiml.message(
       "Error: Your text must include which information you want; options are: `weather`, `closures`, `wikipedia`"

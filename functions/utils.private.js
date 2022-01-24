@@ -112,9 +112,30 @@ const convertUrlToGoogleCacheUrl = (url) =>
 
 const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
+const getLatLngFromInReach = async (inReachSlug) => {
+  const url = `http://inreachlink.com/${inReachSlug}`;
+  const inReachData = await (await axios.get(url)).data;
+
+  let latitude;
+  let longitude;
+  try {
+    latitude = inReachData.match(/\s+lat : (-?\d+\.\d+),/)[1];
+    longitude = inReachData.match(/\s+lon : (-?\d+\.\d+),/)[1];
+
+    console.debug(
+      `Determined InReach location to be: lat ${latitude}, lon ${longitude}`
+    );
+  } catch {
+    console.error(`Failed to find latitude and longitude from ${url}`);
+  }
+
+  return { latitude, longitude };
+};
+
 module.exports = {
   convertUrlToGoogleCacheUrl,
   getInReachSlug,
   maxLengthIfGsm7Encoding,
   sleep,
+  getLatLngFromInReach,
 };

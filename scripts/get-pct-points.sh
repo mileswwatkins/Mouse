@@ -40,10 +40,9 @@ do
             -f CSV \
             -dialect SQLite \
             -sql "
-                SELECT ROUND(ST_X(geometry), 5) AS x,
-                    ROUND(ST_Y(geometry), 5) AS y,
-                    ROUND(ele) AS e,
-                    CAST(name AS INTEGER) AS m
+                SELECT CAST(name AS INTEGER) AS mileage,
+                    ROUND(ST_X(geometry), 4) AS x,
+                    ROUND(ST_Y(geometry), 4) AS y
                 FROM waypoints
                 WHERE sym = 'Triangle, Red' AND
                     name GLOB '[0-9][0-9][0-9][0-9]'
@@ -59,16 +58,10 @@ do
     done
 done
 
-# Need to use `sed` because otherwise `csvjson` adds a `.0`
-# after all of the elevation and mileage numbers from the CSV
 csvsort \
-    -c m \
+    -c mileage \
     /tmp/pct-points.csv \
-| csvjson \
-| sed 's/.0,/,/g' \
-| sed 's/.0}/}/g' \
-> ../assets/pct-points.js
+> /tmp/pct-points-sorted.csv
 
-# Make the output function as a `require`-able JavaScript file
-echo "module.exports = $(cat ../assets/pct-points.js)" \
-> ../assets/pct-points.js
+echo 'Writing JSON output to `../assets/pct-points.json`'
+node format-pct-points.js

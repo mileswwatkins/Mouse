@@ -4,5 +4,5 @@ README.md
 jest.config.js
 package-lock.json
 package.json
-assets/pct-points.js
-assets/at-points.js
+assets/pct-points.private.json
+assets/at-points.private.json

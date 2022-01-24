@@ -111,3 +111,13 @@ test("wikipedia invocation", async () => {
     /<\?xml version="1.0" encoding="UTF-8"\?><Response><Message>.+<\/Message><\/Response>/
   );
 });
+
+test.only("mileage invocation", async () => {
+  const messageXml = await getResponseBody(
+    "mileage pct inreachlink.com/EAKGRGJ"
+  );
+  const messages = getMessages(messageXml);
+
+  expect(messages.length).toBe(1);
+  expect(messages[0]).toBe("");
+});
