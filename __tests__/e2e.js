@@ -110,12 +110,14 @@ test("wikipedia invocation", async () => {
   );
 });
 
-test.only("mileage invocation", async () => {
+test("mileage invocation", async () => {
   const messageXml = await getResponseBody(
     "mileage pct inreachlink.com/EAKGRGJ"
   );
   const messages = getMessages(messageXml);
 
   expect(messages.length).toBe(1);
-  expect(messages[0]).toBe("");
+  expect(messages[0]).toBe(
+    "<Message>The closest Pacific Crest Trail mile marker is 197</Message>"
+  );
 });

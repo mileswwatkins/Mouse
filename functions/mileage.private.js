@@ -11,7 +11,7 @@ const { getInReachSlug, getLatLngFromInReach, trailsInfo } =
     : require(Runtime.getFunctions()["utils"].path);
 
 const getNearestPctPoint = (latitude, longitude) => {
-  const comparisonPoint = point([latitude, longitude]);
+  const comparisonPoint = point([longitude, latitude]);
   const pctFeatures = featureCollection(
     Object.entries(pctPoints).map(([mileage, coordinates]) =>
       point(coordinates, { mileage })
@@ -30,7 +30,6 @@ const handleInvocation = async (invocation, callback) => {
   const twiml = new Twilio.twiml.MessagingResponse();
 
   const trailMatch = invocation.match(/^mileage (\w+) /);
-  console.error(trailsInfo);
   const availableTrails = trailsInfo.map((t) => t.abbreviation);
   if (!trailMatch) {
     twiml.message(
@@ -67,11 +66,10 @@ const handleInvocation = async (invocation, callback) => {
   }
 
   const trailName = trailsInfo.find((t) => t.abbreviation === trail).name;
-  const maxDistance = 20;
-  if (nearest.properties.distance > maxDistance) {
+  if (nearest.properties.distance > 20) {
     twiml.message(
       // prettier-ignore
-      `Error: You are more than ${maxDistance} miles away from the ${trailName}`
+      `Error: Can't determine mileage because you're ${round(nearest.properties.distance)} miles away from the ${trailName}`
     );
     return callback(null, twiml);
   }

@@ -1,3 +1,5 @@
+const axios = require("axios");
+
 // Source: `General Character Count Guide` section of
 // https://support.garmin.com/en-US/?faq=SBFgu4brUwAS4NkL5tNQyA
 // "All other symbols or letters will reduce the character
